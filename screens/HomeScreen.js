@@ -1,6 +1,6 @@
 import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
-import {Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
+import React, {useState} from 'react';
+import {Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View, Vibration} from 'react-native';
 import Timer from "../components/Timer";
 import TimerController from "../components/TimerController";
 // import {AdMobBanner} from "expo-ads-admob";
@@ -18,7 +18,139 @@ const addStyles = StyleSheet.create({
     }
 })
 
+const ALLOWED_TIME_MIN = 1;
+const ALLOWED_TIME_MAX = 999;
+const SECONDS_IN_MINUTE = 60;
+const MILLISECONDS_IN_SECOND = 1000;
+const PERCENTS_MAX = 100;
+const VIBRATION_PATTERN = [1000, 2000, 3000];
+
+
 export default function HomeScreen() {
+    let button;
+
+    const [timerIsRunning, setTimerIsRunning] = useState(false)
+    const [timerState, setTimerState] = useState("work")
+    const [timerId, setTimerId] = useState(0)
+
+    const [timeLengthWork, setTimeLengthWork] = useState(25)
+    const [timeLengthRest, setTimeLengthRest] = useState(5)
+
+    const [percentTimerCompleted, setPercentTimerCompleted] = useState(0)
+    const [timeLeftString, setTimeLeftString] = useState("25 : 00")
+
+
+    const incrementWork = () => {
+        let timeLeft = timeLengthWork;
+        if (timeLeft < ALLOWED_TIME_MAX) {
+            timeLeft += 1
+            setTimeLengthWork(timeLeft)
+            setTimeLeftString(`${timeLeft} : 00`)
+        }
+    }
+
+    const decrementWork = () => {
+        let timeLeft = timeLengthWork;
+        if (timeLeft > ALLOWED_TIME_MIN) {
+            timeLeft -= 1
+            setTimeLengthWork(timeLeft)
+            setTimeLeftString(`${timeLeft} : 00`)
+        }
+    }
+
+    const incrementRest = () => {
+        if (timeLengthRest < ALLOWED_TIME_MAX) {
+            setTimeLengthRest(timeLengthRest + 1)
+        }
+    }
+
+    const decrementRest = () => {
+        if (timeLengthRest > ALLOWED_TIME_MIN) {
+            setTimeLengthRest(timeLengthRest - 1)
+        }
+    }
+
+    const stopTimer = () => {
+        setTimerIsRunning(false)
+        clearInterval(timerId)
+        if (timerState === 'work'){
+            setTimeLeftString(`${timeLengthWork} : 00`)
+        } else {
+            setTimeLeftString(`${timeLengthRest} : 00`)
+        }
+    }
+
+    const startTimer = () => {
+        let duration;
+
+        if (timerState === 'work') {
+            duration = timeLengthWork;
+        } else {
+            duration = timeLengthRest;
+        }
+
+        let totalTime = duration * SECONDS_IN_MINUTE;
+        let currentTime = duration * SECONDS_IN_MINUTE;
+        let minutes, seconds, minutes_str, seconds_str;
+
+        setTimerIsRunning(true);
+
+
+        let timer = setInterval(() => {
+            setTimerId(timer)
+
+            minutes = Math.floor(currentTime / SECONDS_IN_MINUTE)
+            seconds = currentTime - minutes * SECONDS_IN_MINUTE
+
+            currentTime -= 1
+
+            if (currentTime <= 0) {
+                Vibration.vibrate(VIBRATION_PATTERN)
+                if (timerState === "work") {
+                    setTimerState("rest")
+                    stopTimer()
+                    startTimer()
+                } else {
+                    setTimerState("work")
+                    stopTimer()
+                    startTimer()
+                }
+            }
+
+            console.log(currentTime)
+            console.log(timerState)
+
+            // Minute to second conversion
+            if (seconds === 0 && currentTime > 0) {
+                minutes -= 1
+                seconds = 59
+            } else {
+                seconds -= 1
+            }
+
+            // Reporting
+            minutes_str = minutes < 10 ? "0" + minutes : minutes;
+            seconds_str = seconds < 10 ? "0" + seconds : seconds;
+
+            setTimeLeftString(`${minutes_str} : ${seconds_str}`)
+            setPercentTimerCompleted(PERCENTS_MAX - currentTime / totalTime * PERCENTS_MAX)
+
+
+        }, MILLISECONDS_IN_SECOND)
+    }
+
+
+
+    if (timerIsRunning) {
+        button = <TouchableOpacity style={addStyles.flex} onPress={stopTimer}>
+            <Text style={addStyles.largeFont}>Peata</Text>
+        </TouchableOpacity>
+    } else {
+        button = <TouchableOpacity style={addStyles.flex} onPress={startTimer}>
+            <Text style={addStyles.largeFont}>Alusta</Text>
+        </TouchableOpacity>
+    }
+
     return (
         <View style={styles.container}>
             <ScrollView
@@ -29,16 +161,24 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.getStartedContainer}>
-                    <Timer/>
+                    <Timer
+                        timeLeft={timeLeftString}
+                        donePercent={percentTimerCompleted}
+                    />
                 </View>
 
                 <View style={styles.helpContainer}>
-                    <TimerController/>
+                    <TimerController
+                        workTimer={timeLengthWork}
+                        restTimer={timeLengthRest}
+                        incWork={incrementWork}
+                        decWork={decrementWork}
+                        incRest={incrementRest}
+                        decRest={decrementRest}
+                    />
                 </View>
                 <View>
-                    <TouchableOpacity style={addStyles.flex}>
-                        <Text style={addStyles.largeFont}>Alusta</Text>
-                    </TouchableOpacity>
+                    {button}
                 </View>
             </ScrollView>
 
