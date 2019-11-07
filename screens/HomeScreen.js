@@ -45,16 +45,16 @@ class HomeScreen extends Component {
     }
 
 
-
     startCounter() {
         let timer = setInterval(this.tick, MILLISECONDS_IN_SECOND);
-        this.setState({timer,counterRunning:true})
+        this.setState({timer, counterRunning: true})
     }
 
     controlCounter() {
         // End condition
         if (this.state.counter >= this.state.counterMax) {
             this.stopCounter(true);
+            this.swapCounterType();
             this.startCounter();
         }
     };
@@ -63,37 +63,49 @@ class HomeScreen extends Component {
     stopCounter(swapState = false) {
         // State change
         clearInterval(this.state.timer);
-        this.setState({counter: 0, counterRunning:false});
-
-        if (swapState === true) {
-            this.swapCounterType();
-        }
+        this.setState({counter: 0, counterRunning: false});
 
         // Effects
         Vibration.vibrate(VIBRATION_PATTERN);
-        this.playSound();
+        this.playSound('end');
     };
 
     swapCounterType() {
-        let timerState = this.state.timerState;
+        let timerState = this.state.counterType;
 
         if (timerState === 'work') {
-            this.setState({timerState: 'rest'})
+            this.setState({
+                counterType: 'rest',
+                counterMax: this.state.counterRest * SECONDS_IN_MINUTE
+            })
         } else if (timerState === 'rest') {
-            this.setState({timerState: 'work'})
+            this.setState({
+                counterType: 'work',
+                counterMax: this.state.counterWork * SECONDS_IN_MINUTE
+            })
         }
 
     }
 
-    async playSound() {
+    async playSound(sound) {
         const soundObject = new Audio.Sound();
-        try {
-            await soundObject.loadAsync(require('.././assets/sounds/metronome.mp3'));
-            await soundObject.playAsync();
-            // Your sound is playing!
-        } catch (error) {
-            // An error occurred!
+
+        if (sound === 'end') {
+            try {
+                await soundObject.loadAsync(require('.././assets/sounds/metronome.mp3'));
+                await soundObject.playAsync();
+            } catch (error) {
+                // An error occurred!
+            }
+        } else if (sound === 'press') {
+            try {
+                await soundObject.loadAsync(require('.././assets/sounds/press.mp3'));
+                await soundObject.playAsync();
+            } catch (error) {
+                // An error occurred!
+            }
         }
+
     };
 
     tick = () => {
@@ -105,6 +117,7 @@ class HomeScreen extends Component {
         this.percentLeft();
 
     };
+
     // TODO Handle changing it while running
 
     incWork() {
@@ -114,13 +127,14 @@ class HomeScreen extends Component {
                 counterMax: prevState.counterMax + 60,
                 minutes: prevState.minutes + 1
             }))
-        } else if (this.state.counterWork < 99){
+        } else if (this.state.counterWork < 99) {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork + 1,
                 minutes: prevState.minutes + 1
             }))
         }
         this.granulateTime()
+        this.playSound('press')
     };
 
     decWork() {
@@ -130,13 +144,14 @@ class HomeScreen extends Component {
                 counterMax: prevState.counterMax - 60,
                 minutes: prevState.minutes - 1
             }))
-        } else if (this.state.counterWork > 1){
+        } else if (this.state.counterWork > 1) {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork - 1,
                 minutes: prevState.minutes - 1
             }))
         }
         this.granulateTime()
+        this.playSound('press')
     };
 
     incRest() {
@@ -146,13 +161,14 @@ class HomeScreen extends Component {
                 counterMax: prevState.counterMax + 60,
                 minutes: prevState.minutes + 1
             }))
-        } else if (this.state.counterRest < 99){
+        } else if (this.state.counterRest < 99) {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest + 1,
                 minutes: prevState.minutes + 1
             }))
         }
         this.granulateTime()
+        this.playSound('press')
     };
 
     decRest() {
@@ -162,13 +178,14 @@ class HomeScreen extends Component {
                 counterMax: prevState.counterMax - 60,
                 minutes: prevState.minutes - 1
             }))
-        } else if (this.state.counterRest > 1){
+        } else if (this.state.counterRest > 1) {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest - 1,
                 minutes: prevState.minutes - 1
             }))
         }
         this.granulateTime()
+        this.playSound('press')
     };
 
     granulateTime() {
@@ -193,73 +210,70 @@ class HomeScreen extends Component {
     }
 
 
-
-
     render() {
-        let button, bg;
+        let button, bg, order, buttonTheme, buttonThemeText;
 
-        if (this.state.counterRunning === true) {
-            button = <TouchableOpacity style={styles.mainButton} onPress={this.stopCounter}>
-                <Text style={styles.mainButtonText}>Peata</Text>
-            </TouchableOpacity>
-        } else {
-            button = <TouchableOpacity style={styles.mainButton} onPress={this.startCounter}>
-                <Text style={styles.mainButtonText}>Alusta</Text>
-            </TouchableOpacity>
-        }
 
-        if (this.state.counterType === 'work'){
+
+        if (this.state.counterType === 'work') {
             bg = require('.././assets/images/5.jpg')
+            order = 'Keskendu'
+            buttonTheme = styles.mainButton
+            buttonThemeText = styles.mainButtonText
         } else {
             bg = require('.././assets/images/1.jpg')
+            order = 'Puhka'
+            buttonTheme = styles.mainButtonAlt
+            buttonThemeText = styles.mainButtonTextAlt
         }
 
-        return (
-            <View style={styles.container}>
-                <ImageBackground source={bg} style={styles.bg}>
-                    <ScrollView
-                        style={styles.container}
-                        contentContainerStyle={styles.contentContainer}>
-                        <View style={styles.getStartedContainer}>
-                            <TimerCounter
-                                minutes={this.state.minutes}
-                                seconds={this.state.seconds}
-                                percentage={this.state.percentage}
-                            />
-                        </View>
-                        <View style={styles.welcomeContainer}>
-                            <Text style={styles.welcomeText}>Keskendu</Text>
-                        </View>
-                        <View style={styles.helpContainer}>
-                            <TimerController
-                                workTimer={this.state.counterWork}
-                                restTimer={this.state.counterRest}
-                                incWork={this.incWork}
-                                decWork={this.decWork}
-                                incRest={this.incRest}
-                                decRest={this.decRest}
-                            />
-                        </View>
-                        <View style={styles.mainButtonContainer}>
-                            {button}
-                        </View>
-                    </ScrollView>
+        if (this.state.counterRunning === true) {
+            button = <TouchableOpacity style={buttonTheme} onPress={this.stopCounter}>
+                <Text style={buttonThemeText}>Peata</Text>
+            </TouchableOpacity>
+        } else {
+            button = <TouchableOpacity style={buttonTheme} onPress={this.startCounter}>
+                <Text style={buttonThemeText}>Alusta</Text>
+            </TouchableOpacity>
+        }
 
-                    <View style={styles.tabBarInfoContainer}>
-                        {/*<AdMobBanner*/}
-                        {/*    adUnitID="ca-app-pub-3940256099942544/6300978111"*/}
-                        {/*    onAdViewWillLeaveApplication={()=>({})}*/}
-                        {/*    onAdViewWillPresentScreen={()=>({})}*/}
-                        {/*    onAdViewDidReceiveAd={()=>({})}*/}
-                        {/*    onAdViewDidDismissScreen={()=>({})}*/}
-                        {/*    onDidFailToReceiveAdWithError={()=>({})}*/}
-                        {/*    onAdViewWillDismissScreen={()=>({})}*/}
-                        {/*    servePersonalizedAds={false}*/}
-                        {/*    additionalRequestParams={()=>({})}*/}
-                        {/*    testDeviceID="EMULATOR"/>*/}
+
+        return (
+
+            <ImageBackground source={bg} style={styles.bg}>
+                <ScrollView
+                    style={styles.container}
+                    contentContainerStyle={styles.contentContainer}>
+                    <View>
+                        <TimerCounter
+                            minutes={this.state.minutes}
+                            seconds={this.state.seconds}
+                            percentage={this.state.percentage}
+                            counterType={this.state.counterType}
+                        />
                     </View>
-                </ImageBackground>
-            </View>
+                    <View>
+                        <Text style={styles.orderText}>{order}</Text>
+                    </View>
+                    <View style={styles.controllerContainer}>
+                        <TimerController
+                            workTimer={this.state.counterWork}
+                            restTimer={this.state.counterRest}
+                            counterType={this.state.counterType}
+                            incWork={this.incWork}
+                            decWork={this.decWork}
+                            incRest={this.incRest}
+                            decRest={this.decRest}
+                        />
+                    </View>
+                    <View style={styles.mainButtonContainer}>
+                        {button}
+                    </View>
+                </ScrollView>
+
+
+            </ImageBackground>
+
         );
     }
 }
@@ -268,20 +282,24 @@ class HomeScreen extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+
     },
     contentContainer: {
-        paddingTop: 10,
-        justifyContent: 'space-around'
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center'
     },
-    welcomeContainer: {
+    orderContainer: {
         alignItems: 'center',
-        marginTop: 10,
-        marginBottom: 10,
+
+
     },
     codeHighlightContainer: {
         backgroundColor: 'rgba(0,0,0,0.05)',
         borderRadius: 3,
         paddingHorizontal: 4,
+
     },
     tabBarInfoContainer: {
         position: 'absolute',
@@ -303,9 +321,9 @@ const styles = StyleSheet.create({
         backgroundColor: '#272F50',
         paddingVertical: 20,
     },
-    getStartedContainer: {
+    timerContainer: {
         alignItems: 'center',
-        marginHorizontal: 50,
+
     },
     flex: {
         flex: 1,
@@ -315,42 +333,50 @@ const styles = StyleSheet.create({
     },
 
     bg: {
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    mainButtonContainer: {
-        marginTop: 10,
         flex: 1,
-        alignItems: 'center',
-
+        resizeMode: 'stretch'
     },
+    mainButtonContainer: {},
     mainButton: {
         backgroundColor: '#34B3FE',
-        width: 200,
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'stretch',
+        height: 50,
+
         justifyContent: 'center',
         borderRadius: 3,
+        paddingVertical: 10,
+        paddingHorizontal: 60
+    },
+    mainButtonAlt: {
+        backgroundColor: '#C6FF82',
+        height: 50,
+
+        justifyContent: 'center',
+        borderRadius: 3,
+        paddingVertical: 10,
+        paddingHorizontal: 60
     },
     mainButtonText: {
         color: '#E1E4F3',
         fontSize: 24,
         fontWeight: 'bold',
-        paddingTop: 10,
-        paddingBottom: 10
+        alignSelf: 'center'
     },
-    welcomeText: {
+    mainButtonTextAlt: {
+        color: '#002601',
+        fontSize: 24,
+        fontWeight: 'bold',
+        alignSelf: 'center'
+    },
+    orderText: {
         fontSize: 30,
         color: '#fff',
         fontWeight: 'bold',
-        marginTop: 20
     },
-    helpContainer: {
-        marginTop: 10,
+    controllerContainer: {
         alignItems: 'center',
+        height: 130,
+        width: '90%',
+        alignSelf: 'center'
     },
     helpLink: {
         paddingVertical: 10,
@@ -392,6 +418,19 @@ const styles = StyleSheet.create({
 
 
 })
+
+HomeScreen.navigationOptions = {
+    headerStyle: {
+        backgroundColor: 'transparent',
+    },
+    headerTitleStyle: {
+        color: '#E1E4F3'
+    },
+    headerBackTitleStyle: {
+        color: '#E1E4F3'
+    },
+    headerTransparent: true
+};
 
 
 export default HomeScreen;

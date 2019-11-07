@@ -1,22 +1,43 @@
 import React, {Component} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {Dimensions, StyleSheet, Text, View} from 'react-native';
 import ProgressCircle from 'react-native-progress-circle'
 
 
 class TimerCounter extends Component {
+
+
     render() {
+        let color, shadowColor, bgColor;
+        const screenWidth = Math.round(Dimensions.get('window').width)
+        const radius = screenWidth / 4
+        const border = screenWidth / 20
+        const text = screenWidth / 15
+
+        if (this.props.counterType === 'work') {
+            color = "#8293FF"
+            shadowColor = "#E1E4F3"
+            bgColor = "#1A2640"
+        } else {
+            color = "#C6FF82"
+            shadowColor = "#E1E4F3"
+            bgColor = "#27401a"
+        }
+
         return (
             <View>
 
                 <ProgressCircle
                     percent={this.props.percentage}
-                    radius={100}
-                    borderWidth={15}
-                    color="#8293FF"
-                    shadowColor="#E1E4F3"
-                    bgColor="#1A2640"
+                    radius={radius}
+                    borderWidth={border}
+                    color={color}
+                    shadowColor={shadowColor}
+                    bgColor={bgColor}
                 >
-                    <Text style={styles.title}>{`${this.props.minutes} : ${this.props.seconds}`}</Text>
+                    <Text style={{
+                        fontSize: text,
+                        color: '#E1E4F3'
+                    }}>{`${this.props.minutes} : ${this.props.seconds}`}</Text>
                 </ProgressCircle>
             </View>
         );
@@ -24,10 +45,7 @@ class TimerCounter extends Component {
 }
 
 const styles = StyleSheet.create({
-    title: {
-        fontSize: 24,
-        color: '#E1E4F3'
-    }
+    title: {}
 })
 
 

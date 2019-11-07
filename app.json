@@ -29,6 +29,12 @@
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
       }
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#1A2640",
+      "barStyle": "dark-content"
+    },
+    "primaryColor": "#1A2640"
     }
   }
 }
