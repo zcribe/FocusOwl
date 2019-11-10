@@ -1,12 +1,24 @@
 import React, {Component} from 'react';
-import {ImageBackground, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View} from 'react-native';
+import {
+    AsyncStorage,
+    ImageBackground,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    Vibration,
+    View
+} from 'react-native';
+
 
 import TimerCounter from "../components/TimerCounter";
 import TimerController from "../components/TimerController";
 import {Audio} from "expo-av";
 
+
 const ALLOWED_TIME_MIN = 1;
-const ALLOWED_TIME_MAX = 999;
+const ALLOWED_TIME_MAX = 99;
 const SECONDS_IN_MINUTE = 60;
 const MILLISECONDS_IN_SECOND = 1000;
 const PERCENTS_MAX = 100;
@@ -25,9 +37,9 @@ class HomeScreen extends Component {
             counterType: 'work',
             counterWork: 25,
             counterRest: 5,
-            minutes: 25,
+            minutes: '25',
             seconds: '00',
-            percentage: 0
+            percentage: 0,
         };
 
         this.startCounter = this.startCounter.bind(this);
@@ -42,6 +54,57 @@ class HomeScreen extends Component {
         this.incRest = this.incRest.bind(this);
         this.decWork = this.decWork.bind(this);
         this.decRest = this.decRest.bind(this);
+        this._setData = this._setData.bind(this);
+        this._getData = this._getData.bind(this);
+        this._mergeData = this._mergeData.bind(this);
+        this.storeCycle = this.storeCycle.bind(this);
+    }
+
+    async _setData(key, data) {
+        try {
+            await AsyncStorage.setItem(key, data);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    async _getData(key) {
+        try {
+            const value = await AsyncStorage.getItem(key);
+            if (value !== null) {
+                // We have data!!
+                console.log(value);
+                return value
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    async _mergeData(key, data) {
+        try {
+            AsyncStorage.mergeItem(key, data);
+            if (value !== null) {
+                // We have data!!
+                console.log(value);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    storeCycle(cycleType, minutes) {
+        let data_key, data_object, sessionDate, sessionType, sessionLength;
+
+        sessionDate = Date.now().toISOString().slice(0, 10);
+        sessionType = cycleType;
+        sessionLength = minutes;
+
+        data_key = 'keskenduRecords';
+
+
     }
 
 
@@ -118,19 +181,18 @@ class HomeScreen extends Component {
 
     };
 
-    // TODO Handle changing it while running
 
-    incWork() {
-        if (this.state.counterWork < 99 && this.state.counterType === 'work') {
+    async incWork() {
+        if (this.state.counterWork < ALLOWED_TIME_MAX && this.state.counterType === 'work') {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork + 1,
-                counterMax: prevState.counterMax + 60,
-                minutes: prevState.minutes + 1
+                counterMax: prevState.counterMax + SECONDS_IN_MINUTE,
+
             }))
-        } else if (this.state.counterWork < 99) {
+        } else if (this.state.counterWork < ALLOWED_TIME_MAX) {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork + 1,
-                minutes: prevState.minutes + 1
+
             }))
         }
         this.granulateTime()
@@ -138,16 +200,16 @@ class HomeScreen extends Component {
     };
 
     decWork() {
-        if (this.state.counterWork > 1 && this.state.counterType === 'work') {
+        if (this.state.counterWork > ALLOWED_TIME_MIN && this.state.counterType === 'work') {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork - 1,
-                counterMax: prevState.counterMax - 60,
-                minutes: prevState.minutes - 1
+                counterMax: prevState.counterMax - SECONDS_IN_MINUTE,
+
             }))
-        } else if (this.state.counterWork > 1) {
+        } else if (this.state.counterWork > ALLOWED_TIME_MIN) {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork - 1,
-                minutes: prevState.minutes - 1
+
             }))
         }
         this.granulateTime()
@@ -155,16 +217,17 @@ class HomeScreen extends Component {
     };
 
     incRest() {
-        if (this.state.counterRest < 99 && this.state.counterType === 'rest') {
+        if (this.state.counterRest < ALLOWED_TIME_MAX && this.state.counterType === 'rest') {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest + 1,
-                counterMax: prevState.counterMax + 60,
-                minutes: prevState.minutes + 1
-            }))
-        } else if (this.state.counterRest < 99) {
+                counterMax: prevState.counterMax + SECONDS_IN_MINUTE,
+
+            }));
+            this.granulateTime()
+        } else if (this.state.counterRest < ALLOWED_TIME_MAX) {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest + 1,
-                minutes: prevState.minutes + 1
+
             }))
         }
         this.granulateTime()
@@ -172,16 +235,16 @@ class HomeScreen extends Component {
     };
 
     decRest() {
-        if (this.state.counterRest > 1 && this.state.counterType === 'rest') {
+        if (this.state.counterRest > ALLOWED_TIME_MIN && this.state.counterType === 'rest') {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest - 1,
-                counterMax: prevState.counterMax - 60,
-                minutes: prevState.minutes - 1
+                counterMax: prevState.counterMax - SECONDS_IN_MINUTE,
+
             }))
-        } else if (this.state.counterRest > 1) {
+        } else if (this.state.counterRest > ALLOWED_TIME_MIN) {
             this.setState((prevState, props) => ({
                 counterRest: prevState.counterRest - 1,
-                minutes: prevState.minutes - 1
+
             }))
         }
         this.granulateTime()
@@ -212,7 +275,6 @@ class HomeScreen extends Component {
 
     render() {
         let button, bg, order, buttonTheme, buttonThemeText;
-
 
 
         if (this.state.counterType === 'work') {

@@ -2,6 +2,57 @@ import React, {Component} from 'react';
 import {Button, StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 
 
+
+
+class TimerController extends Component {
+    render() {
+        let buttonTextAdd, subLabel, name, timerController;
+
+        if (this.props.counterType === 'work'){
+            buttonTextAdd = styles.timerButtonTextAdd;
+            subLabel = styles.timerSubLabel;
+            name = styles.timerName
+            timerController = styles.timerController
+        } else {
+            buttonTextAdd = styles.timerButtonTextAddAlt;
+            subLabel = styles.timerSubLabelAlt;
+            name = styles.timerNameAlt
+            timerController = styles.timerControllerAlt
+        }
+        return (
+            <View style={timerController}>
+
+                <View style={styles.flexColumn}>
+                    <Text style={name}>Keskendu</Text>
+                    <View style={styles.flex}>
+                        <TouchableOpacity title="+" onPress={()=>this.props.incWork()} style={styles.timerButton}>
+                            <Text style={buttonTextAdd}>+</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.timerLabel}>{this.props.workTimer}</Text>
+                        <Text style={subLabel}> min</Text>
+                        <TouchableOpacity title="-" onPress={()=>this.props.decWork()} style={styles.timerButton}>
+                            <Text style={styles.timerButtonText}>-</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+                <View style={styles.flexColumn}>
+                    <Text style={name}>Paus</Text>
+                    <View style={styles.flex}>
+                        <TouchableOpacity title="+" onPress={()=>this.props.incRest()} style={styles.timerButton}>
+                            <Text style={buttonTextAdd}>+</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.timerLabel}>{this.props.restTimer}</Text>
+                        <Text style={subLabel}> min</Text>
+                        <TouchableOpacity title="-" onPress={()=>this.props.decRest()} style={styles.timerButton} >
+                            <Text style={styles.timerButtonText}>-</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+}
+
 const styles = StyleSheet.create({
     flex: {
         flex: 1,
@@ -85,54 +136,5 @@ const styles = StyleSheet.create({
         fontWeight: '300'
     }
 })
-
-class TimerController extends Component {
-    render() {
-        let buttonTextAdd, subLabel, name, timerController;
-
-        if (this.props.counterType === 'work'){
-            buttonTextAdd = styles.timerButtonTextAdd;
-            subLabel = styles.timerSubLabel;
-            name = styles.timerName
-            timerController = styles.timerController
-        } else {
-            buttonTextAdd = styles.timerButtonTextAddAlt;
-            subLabel = styles.timerSubLabelAlt;
-            name = styles.timerNameAlt
-            timerController = styles.timerControllerAlt
-        }
-        return (
-            <View style={timerController}>
-
-                <View style={styles.flexColumn}>
-                    <Text style={name}>Keskendu</Text>
-                    <View style={styles.flex}>
-                        <TouchableOpacity title="+" onPress={()=>this.props.incWork()} style={styles.timerButton}>
-                            <Text style={buttonTextAdd}>+</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.timerLabel}>{this.props.workTimer}</Text>
-                        <Text style={subLabel}> min</Text>
-                        <TouchableOpacity title="-" onPress={()=>this.props.decWork()} style={styles.timerButton}>
-                            <Text style={styles.timerButtonText}>-</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-                <View style={styles.flexColumn}>
-                    <Text style={name}>Paus</Text>
-                    <View style={styles.flex}>
-                        <TouchableOpacity title="+" onPress={()=>this.props.incRest()} style={styles.timerButton}>
-                            <Text style={buttonTextAdd}>+</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.timerLabel}>{this.props.restTimer}</Text>
-                        <Text style={subLabel}> min</Text>
-                        <TouchableOpacity title="-" onPress={()=>this.props.decRest()} style={styles.timerButton} >
-                            <Text style={styles.timerButtonText}>-</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </View>
-        );
-    }
-}
 
 export default TimerController;
