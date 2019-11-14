@@ -1,11 +1,14 @@
-import React from 'react';
-import {Dimensions, ScrollView, StyleSheet, Text, View} from 'react-native';
+import React, {Component} from 'react';
+import {Dimensions, ImageBackground, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {ContributionGraph, LineChart} from "react-native-chart-kit";
+import * as SQLite from "expo-sqlite";
 
+const DB_NAME = 'sessionStore';
+const DB = SQLite.openDatabase(DB_NAME);
 
 
 const commitsData = [
-    {date: "2019-08-02", count: 1},
+    {date: "2019-08-02", workCount: 1},
     {date: "2019-08-03", count: 2},
     {date: "2019-08-04", count: 3},
     {date: "2019-08-05", count: 4},
@@ -17,73 +20,243 @@ const commitsData = [
     {date: "2019-09-05", count: 2},
     {date: "2019-09-30", count: 4}
 ];
+
+const data = {}
+
 const screenWidth = Dimensions.get("window").width;
 
 const chartConfig = {
-    backgroundColor: "#E1E4F3",
-    backgroundGradientFrom: "#3D4A76",
-    backgroundGradientTo: "#3D4A76",
+    backgroundColor: "#8293FF",
+    backgroundGradientFrom: "#272F50",
+    backgroundGradientTo: "#272F50",
     decimalPlaces: 0, // optional, defaults to 2dp
-    color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+    color: (opacity = 1) => `rgba(52, 179, 254, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(225, 228, 243, ${opacity})`,
     style: {},
     propsForDots: {
         r: "6",
         strokeWidth: "2",
-        stroke: "#8293FF"
+        stroke: "#34B3FE"
     }
 }
 
 
-export default function LinksScreen() {
+export default class LinksScreen extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            totalMinutes: 0,
+            weekMinutes: [0, 0, 0, 0, 0, 0, 0, 0],
+            threeMonthsCounts: [{}]
+        };
 
-    return (
-        <ScrollView style={styles.container}>
-            <View>
-                <Text>200</Text>
-                <Text>minutes of focusing</Text>
-            </View>
-            <Text>This week:</Text>
-            <LineChart
-                data={{
-                    labels: ["Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun"],
-                    datasets: [
-                        {
-                            data: [
-                                200,
-                                150,
-                                600,
-                                777,
-                                432,
-                                667
-                            ]
-                        }
+        this.readData = this.readData.bind(this)
+        this.objArrToArr = this.objArrToArr.bind(this)
+        this.readData()
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        this.readData()
+    }
+
+    objArrToArr(objArr) {
+        let outArr = [];
+        for (let i = 0; i < objArr.length; i++) {
+            outArr.push(objArr[i]["workMinutes"])
+        }
+        return outArr
+    }
+
+    readData() {
+        // READ TODAY
+        DB.transaction(tx => {
+            tx.executeSql(`
+                        SELECT workMinutes
+                        FROM days
+                        WHERE date = DATE('now')`,
+                null,
+                (trans, res) => {
+
+                    if (res['rows']['length'] > 0) {
+                        let totalMinutes = res['rows']['_array'][0]['workMinutes']
+                        this.setState({
+                            totalMinutes: totalMinutes
+                        })
+                    }
+
+                })
+        });
+
+        // READ WEEK
+        DB.transaction(tx => {
+            tx.executeSql(`
+                        SELECT workMinutes
+                        FROM days
+                        WHERE date BETWEEN DATE('now', '-7 day') and DATE('now')`,
+                null,
+                (trans, res) => {
+                    let weekMinutes = this.objArrToArr(res['rows']['_array'])
+                    this.setState({
+                        weekMinutes: weekMinutes
+                    })
+                },
+                e => console.log('ERROR:', e))
+        }, null, (trans, res) => {
+        });
+
+        // READ THREE MONTHS
+        DB.transaction(tx => {
+            tx.executeSql(`
+                        SELECT workCount AS count, date
+                        FROM days
+                        WHERE date BETWEEN DATE('now', '-90 day') and DATE('now')`,
+                null,
+                (trans, res) => {
+
+                    this.setState({
+                        threeMonthsCounts: res['rows']['_array']
+                    })
+                },
+                e => console.log('ERROR:', e))
+        }, null, (trans, res) => {
+        });
+    }
+
+    render() {
+        let data = {
+            labels: ["Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun"],
+            datasets: [
+                {
+                    data: [
+                        200,
+                        150,
+                        600,
+                        777,
+                        432,
+                        667
                     ]
-                }}
-                width={screenWidth} // from react-native
-                height={220}
-                yAxisSuffix={"min"}
-                chartConfig={chartConfig}
-                bezier
-                style={{
-                    marginVertical: 8
-                }}
-            />
-            <Text>Last three months:</Text>
-            <ContributionGraph values={commitsData} endDate={new Date()}
-                               numDays={105} width={screenWidth} height={220} chartConfig={chartConfig}/>
-        </ScrollView>
-    );
+                }
+            ]
+        };
+        data['datasets'][0]['data'] = this.state.weekMinutes;
+
+        const a = [
+            {
+                "date": "2019-11-12",
+                "workCount": 0,
+            },
+            {
+                "date": "2019-11-13",
+                "workCount": 0,
+            },
+            {
+                "date": "2019-11-14",
+                "workCount": 100,
+            },
+        ]
+
+
+        return (
+            <ImageBackground source={require('.././assets/images/6.jpg')} style={styles.bg}>
+                <ScrollView style={styles.container}>
+                    <View style={styles.containerDay}>
+                        <Text style={styles.chartTitle}>Today</Text>
+                        <Text style={styles.todayTotal}>
+                            {this.state.totalMinutes}
+                        </Text>
+                        <Text style={styles.timeUnit}>min</Text>
+                    </View>
+                    <View style={styles.containerWeek}>
+                        <Text style={styles.chartTitle}>Week</Text>
+                        <LineChart
+                            data={data}
+                            width={screenWidth} // from react-native
+                            height={220}
+                            yAxisSuffix={"min"}
+                            chartConfig={chartConfig}
+                            bezier
+                            style={{
+                                marginVertical: 8
+                            }}
+                        />
+                    </View>
+                    <View style={styles.containerMonths}>
+                        <Text style={styles.chartTitle}>Three months</Text>
+                        <ContributionGraph values={this.state.threeMonthsCounts} endDate={new Date()}
+                                           numDays={90} width={screenWidth} height={220} chartConfig={chartConfig}/>
+                    </View>
+                </ScrollView>
+            </ImageBackground>
+        );
+    }
 }
 
 LinksScreen.navigationOptions = {
     title: 'Statistics',
+    headerStyle: {
+        backgroundColor: '#1A2640',
+        color: '#E1E4F3'
+    },
+    headerTitleStyle: {
+        color: '#E1E4F3'
+    },
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 15,
-        backgroundColor: '#fff',
+        // backgroundColor: '#1A2640',
+    },
+    containerDay: {
+        backgroundColor: '#272F50',
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        marginTop: 20,
+        padding: 10,
+        opacity: .8
+
+    },
+    containerWeek: {
+        backgroundColor: '#272F50',
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        marginTop: 20,
+        padding: 10,
+        opacity: .8
+
+    },
+    containerMonths: {
+        backgroundColor: '#272F50',
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-around',
+        alignItems: 'center',
+        marginTop: 20,
+        padding: 10,
+        opacity: .8
+
+    },
+    todayTotal: {
+        fontSize: 45,
+        fontWeight: '700',
+        color: '#34B3FE'
+    },
+    chartTitle: {
+        color: '#e2eef3',
+        fontWeight: '700'
+    },
+    timeUnit: {
+        color: '#9FA6C9',
+        fontSize: 10,
+        fontWeight: '300'
+    },
+    bg: {
+        flex: 1,
+        resizeMode: 'stretch'
     },
 });

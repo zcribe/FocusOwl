@@ -4,6 +4,20 @@ import ProgressCircle from 'react-native-progress-circle'
 
 
 class TimerCounter extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            minutes: this.props.minutes,
+            seconds: this.props.seconds,
+            percentage: this.props.percentage
+        }
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.minutes !== this.props.minutes) {
+            this.setState({minutes: this.props.minutes});
+        }
+    }
 
 
     render() {
@@ -27,17 +41,17 @@ class TimerCounter extends Component {
             <View>
 
                 <ProgressCircle
-                    percent={this.props.percentage}
+                    percent={this.state.percentage}
                     radius={radius}
                     borderWidth={border}
                     color={color}
                     shadowColor={shadowColor}
                     bgColor={bgColor}
                 >
-                    <Text style={{
+                    <Text key={this.state.minutes} style={{
                         fontSize: text,
                         color: '#E1E4F3'
-                    }}>{`${this.props.minutes} : ${this.props.seconds}`}</Text>
+                    }}>{`${this.state.minutes} : ${this.state.seconds}`}</Text>
                 </ProgressCircle>
             </View>
         );

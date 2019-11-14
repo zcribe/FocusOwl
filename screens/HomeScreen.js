@@ -1,21 +1,10 @@
 import React, {Component} from 'react';
-import {
-    AsyncStorage,
-    ImageBackground,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    Vibration,
-    View
-} from 'react-native';
-
+import {ImageBackground, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View} from 'react-native';
+import {Audio} from "expo-av";
+import * as SQLite from 'expo-sqlite';
 
 import TimerCounter from "../components/TimerCounter";
 import TimerController from "../components/TimerController";
-import {Audio} from "expo-av";
-
 
 const ALLOWED_TIME_MIN = 1;
 const ALLOWED_TIME_MAX = 99;
@@ -25,6 +14,8 @@ const PERCENTS_MAX = 100;
 const VIBRATION_PATTERN = [100, 100, 100];
 const COUNTER_WORK_SECONDS = 25 * 60;
 const COUNTER_REST_SECONDS = 5 * 60;
+const DB_NAME = 'sessionStore';
+const DB = SQLite.openDatabase(DB_NAME);
 
 class HomeScreen extends Component {
     constructor(props) {
@@ -42,6 +33,7 @@ class HomeScreen extends Component {
             percentage: 0,
         };
 
+
         this.startCounter = this.startCounter.bind(this);
         this.controlCounter = this.controlCounter.bind(this);
         this.stopCounter = this.stopCounter.bind(this);
@@ -54,63 +46,20 @@ class HomeScreen extends Component {
         this.incRest = this.incRest.bind(this);
         this.decWork = this.decWork.bind(this);
         this.decRest = this.decRest.bind(this);
-        this._setData = this._setData.bind(this);
-        this._getData = this._getData.bind(this);
-        this._mergeData = this._mergeData.bind(this);
-        this.storeCycle = this.storeCycle.bind(this);
+        this.createDaysEntry = this.createDaysEntry.bind(this);
+        this.createSessionEntry = this.createSessionEntry.bind(this);
+        this.updateDayEntry = this.updateDayEntry.bind(this);
     }
 
-    async _setData(key, data) {
-        try {
-            await AsyncStorage.setItem(key, data);
-        } catch (error) {
-            console.log(error)
-        }
+    componentDidMount() {
+        this.createDaysEntry()
     }
 
-
-    async _getData(key) {
-        try {
-            const value = await AsyncStorage.getItem(key);
-            if (value !== null) {
-                // We have data!!
-                console.log(value);
-                return value
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    async _mergeData(key, data) {
-        try {
-            AsyncStorage.mergeItem(key, data);
-            if (value !== null) {
-                // We have data!!
-                console.log(value);
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-
-    storeCycle(cycleType, minutes) {
-        let data_key, data_object, sessionDate, sessionType, sessionLength;
-
-        sessionDate = Date.now().toISOString().slice(0, 10);
-        sessionType = cycleType;
-        sessionLength = minutes;
-
-        data_key = 'keskenduRecords';
-
-
-    }
 
 
     startCounter() {
         let timer = setInterval(this.tick, MILLISECONDS_IN_SECOND);
-        this.setState({timer, counterRunning: true})
+        this.setState({timer, counterRunning: true});
     }
 
     controlCounter() {
@@ -127,6 +76,11 @@ class HomeScreen extends Component {
         // State change
         clearInterval(this.state.timer);
         this.setState({counter: 0, counterRunning: false});
+
+        // Create record
+        this.createSessionEntry();
+        // Update days entry
+        this.updateDayEntry();
 
         // Effects
         Vibration.vibrate(VIBRATION_PATTERN);
@@ -148,6 +102,7 @@ class HomeScreen extends Component {
             })
         }
 
+        this.granulateTime()
     }
 
     async playSound(sound) {
@@ -182,7 +137,7 @@ class HomeScreen extends Component {
     };
 
 
-    async incWork() {
+    incWork() {
         if (this.state.counterWork < ALLOWED_TIME_MAX && this.state.counterType === 'work') {
             this.setState((prevState, props) => ({
                 counterWork: prevState.counterWork + 1,
@@ -195,7 +150,7 @@ class HomeScreen extends Component {
 
             }))
         }
-        this.granulateTime()
+        this.granulateTime();
         this.playSound('press')
     };
 
@@ -272,9 +227,69 @@ class HomeScreen extends Component {
         this.setState({percentage: this.state.counter / this.state.counterMax * PERCENTS_MAX})
     }
 
+    createDaysEntry() {
+        DB.transaction(tx => {
+            tx.executeSql(`
+                INSERT INTO days
+                VALUES (DATE('now'), ?, ?, ?, ?)`, [0, 0, 0, 0])
+        })
+    }
+
+    createSessionEntry() {
+        let length, type;
+
+        type = this.state.counterType;
+
+        if (type === 'work') {
+            length = this.state.counterWork
+        } else {
+            length = this.state.counterRest
+        }
+
+        DB.transaction(
+            tx => {
+                tx.executeSql(`
+                    INSERT INTO sessions
+                    VALUES (DATE('now'), ?, ?)`, [type, length])
+            }
+        )
+    }
+
+    updateDayEntry() {
+        let minutes, type;
+
+        type = this.state.counterType;
+
+        if (type === 'work') {
+            minutes = this.state.counterWork;
+            DB.transaction(
+                tx => {
+                    tx.executeSql(`
+                        UPDATE days
+                        SET workMinutes = workMinutes + ?,
+                            workCount   = workCount + 1
+                        WHERE DATE = DATE('now')`, [minutes])
+                }
+            )
+        } else {
+            minutes = this.state.counterRest
+            DB.transaction(
+                tx => {
+                    tx.executeSql(`
+                        UPDATE days
+                        SET restMinutes = restMinutes + ?,
+                            restCount   = restCount + 1
+                        WHERE DATE = DATE('now')`, [minutes])
+                }
+            )
+        }
+
+
+    }
+
 
     render() {
-        let button, bg, order, buttonTheme, buttonThemeText;
+        let button, bg, order, buttonTheme, buttonThemeText, orderButton;
 
 
         if (this.state.counterType === 'work') {
@@ -299,6 +314,15 @@ class HomeScreen extends Component {
             </TouchableOpacity>
         }
 
+        if (this.state.counterType === 'work') {
+            orderButton = <TouchableOpacity  onPress={this.swapCounterType}>
+                <Text style={styles.orderText}>{order}</Text>
+            </TouchableOpacity>
+        } else {
+            orderButton = <TouchableOpacity  onPress={this.swapCounterType}>
+                <Text style={styles.orderText}>{order}</Text>
+            </TouchableOpacity>
+        }
 
         return (
 
@@ -315,7 +339,7 @@ class HomeScreen extends Component {
                         />
                     </View>
                     <View>
-                        <Text style={styles.orderText}>{order}</Text>
+                        {orderButton}
                     </View>
                     <View style={styles.controllerContainer}>
                         <TimerController
@@ -341,147 +365,149 @@ class HomeScreen extends Component {
 }
 
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+const
+    styles = StyleSheet.create({
+        container: {
+            flex: 1,
 
-    },
-    contentContainer: {
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-around',
-        alignItems: 'center'
-    },
-    orderContainer: {
-        alignItems: 'center',
-
-
-    },
-    codeHighlightContainer: {
-        backgroundColor: 'rgba(0,0,0,0.05)',
-        borderRadius: 3,
-        paddingHorizontal: 4,
-
-    },
-    tabBarInfoContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        ...Platform.select({
-            ios: {
-                shadowColor: 'black',
-                shadowOffset: {width: 0, height: -3},
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-            },
-            android: {
-                elevation: 20,
-            },
-        }),
-        alignItems: 'center',
-        backgroundColor: '#272F50',
-        paddingVertical: 20,
-    },
-    timerContainer: {
-        alignItems: 'center',
-
-    },
-    flex: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'stretch',
-        justifyContent: 'center',
-    },
-
-    bg: {
-        flex: 1,
-        resizeMode: 'stretch'
-    },
-    mainButtonContainer: {},
-    mainButton: {
-        backgroundColor: '#34B3FE',
-        height: 50,
-
-        justifyContent: 'center',
-        borderRadius: 3,
-        paddingVertical: 10,
-        paddingHorizontal: 60
-    },
-    mainButtonAlt: {
-        backgroundColor: '#C6FF82',
-        height: 50,
-
-        justifyContent: 'center',
-        borderRadius: 3,
-        paddingVertical: 10,
-        paddingHorizontal: 60
-    },
-    mainButtonText: {
-        color: '#E1E4F3',
-        fontSize: 24,
-        fontWeight: 'bold',
-        alignSelf: 'center'
-    },
-    mainButtonTextAlt: {
-        color: '#002601',
-        fontSize: 24,
-        fontWeight: 'bold',
-        alignSelf: 'center'
-    },
-    orderText: {
-        fontSize: 30,
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    controllerContainer: {
-        alignItems: 'center',
-        height: 130,
-        width: '90%',
-        alignSelf: 'center'
-    },
-    helpLink: {
-        paddingVertical: 10,
-    },
-    helpLinkText: {
-        fontSize: 14,
-        color: '#b72c41',
-    },
-    developmentModeText: {
-        marginBottom: 20,
-        color: 'rgba(0,0,0,0.4)',
-        fontSize: 14,
-        lineHeight: 19,
-        textAlign: 'center',
-    },
-
-    homeScreenFilename: {
-        marginVertical: 7,
-    },
-    codeHighlightText: {
-        color: 'rgba(96,100,109, 0.8)',
-    },
-
-    getStartedText: {
-        fontSize: 17,
-        color: 'rgba(96,100,109, 1)',
-        lineHeight: 24,
-        textAlign: 'center',
-    },
-
-    tabBarInfoText: {
-        fontSize: 17,
-        color: '#757FA1',
-        textAlign: 'center',
-    },
-    navigationFilename: {
-        marginTop: 5,
-    },
+        },
+        contentContainer: {
+            flex: 1,
+            flexDirection: 'column',
+            justifyContent: 'space-around',
+            alignItems: 'center'
+        },
+        orderContainer: {
+            alignItems: 'center',
 
 
-})
+        },
+        codeHighlightContainer: {
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: 3,
+            paddingHorizontal: 4,
 
-HomeScreen.navigationOptions = {
+        },
+        tabBarInfoContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            ...Platform.select({
+                ios: {
+                    shadowColor: 'black',
+                    shadowOffset: {width: 0, height: -3},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                },
+                android: {
+                    elevation: 20,
+                },
+            }),
+            alignItems: 'center',
+            backgroundColor: '#272F50',
+            paddingVertical: 20,
+        },
+        timerContainer: {
+            alignItems: 'center',
+
+        },
+        flex: {
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'stretch',
+            justifyContent: 'center',
+        },
+
+        bg: {
+            flex: 1,
+            resizeMode: 'stretch'
+        },
+        mainButtonContainer: {},
+        mainButton: {
+            backgroundColor: '#34B3FE',
+            height: 50,
+
+            justifyContent: 'center',
+            borderRadius: 3,
+            paddingVertical: 10,
+            paddingHorizontal: 60
+        },
+        mainButtonAlt: {
+            backgroundColor: '#C6FF82',
+            height: 50,
+
+            justifyContent: 'center',
+            borderRadius: 3,
+            paddingVertical: 10,
+            paddingHorizontal: 60
+        },
+        mainButtonText: {
+            color: '#E1E4F3',
+            fontSize: 24,
+            fontWeight: 'bold',
+            alignSelf: 'center'
+        },
+        mainButtonTextAlt: {
+            color: '#002601',
+            fontSize: 24,
+            fontWeight: 'bold',
+            alignSelf: 'center'
+        },
+        orderText: {
+            fontSize: 30,
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+        controllerContainer: {
+            alignItems: 'center',
+            height: 130,
+            width: '90%',
+            alignSelf: 'center'
+        },
+        helpLink: {
+            paddingVertical: 10,
+        },
+        helpLinkText: {
+            fontSize: 14,
+            color: '#b72c41',
+        },
+        developmentModeText: {
+            marginBottom: 20,
+            color: 'rgba(0,0,0,0.4)',
+            fontSize: 14,
+            lineHeight: 19,
+            textAlign: 'center',
+        },
+
+        homeScreenFilename: {
+            marginVertical: 7,
+        },
+        codeHighlightText: {
+            color: 'rgba(96,100,109, 0.8)',
+        },
+
+        getStartedText: {
+            fontSize: 17,
+            color: 'rgba(96,100,109, 1)',
+            lineHeight: 24,
+            textAlign: 'center',
+        },
+
+        tabBarInfoText: {
+            fontSize: 17,
+            color: '#757FA1',
+            textAlign: 'center',
+        },
+        navigationFilename: {
+            marginTop: 5,
+        },
+
+
+    })
+
+HomeScreen
+    .navigationOptions = {
     headerStyle: {
         backgroundColor: 'transparent',
     },
