@@ -17,17 +17,15 @@ export default class SettingsScreen extends Component {
         if (type === 'email') {
             Linking.openURL('mailto:xxx@hot.ee')
         } else if (type === 'website') {
-            Linking.openURL('http:www.google.com')
+            Linking.openURL('https://zcribe.github.io/FocusOwl/')
         } else if (type === 'delete') {
             this._deleteData()
         } else if (type === 'privacy') {
-            Linking.openURL('http:www.google.com')
+            this.props.navigation.navigate('Privacy')
         } else if (type === 'source') {
             Linking.openURL('https://github.com/zcribe/FocusOwl')
         } else if (type === 'license') {
-            Linking.openURL('http:www.google.com')
-        } else if (type === 'credit') {
-            console.log()
+            this.props.navigation.navigate('Licence')
         } else if (type === 'pomodoro') {
             Linking.openURL('https://en.wikipedia.org/wiki/Pomodoro_Technique')
         }
@@ -114,6 +112,7 @@ export default class SettingsScreen extends Component {
         );
     }
 }
+
 
 
 SettingsScreen.navigationOptions = {

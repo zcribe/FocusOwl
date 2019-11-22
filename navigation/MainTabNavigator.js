@@ -6,6 +6,8 @@ import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import LicenceScreen from "../screens/LicenceScreen";
+import PrivacyScreen from "../screens/PrivacyScreen";
 
 const config = Platform.select({
     web: {headerMode: 'screen'},
@@ -54,6 +56,8 @@ LinksStack.path = '';
 const SettingsStack = createStackNavigator(
     {
         Settings: SettingsScreen,
+        Privacy: PrivacyScreen,
+        License: LicenceScreen
     },
     config
 );
