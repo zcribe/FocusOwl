@@ -23,7 +23,7 @@ export default class SettingsScreen extends Component {
         } else if (type === 'privacy') {
             Linking.openURL('http:www.google.com')
         } else if (type === 'source') {
-            Linking.openURL('http:www.google.com')
+            Linking.openURL('https://github.com/zcribe/FocusOwl')
         } else if (type === 'license') {
             Linking.openURL('http:www.google.com')
         } else if (type === 'credit') {
