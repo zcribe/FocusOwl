@@ -20,7 +20,7 @@ const HomeStack = createStackNavigator(
 );
 
 HomeStack.navigationOptions = {
-    tabBarLabel: 'Keskendu',
+    tabBarLabel: 'Timer',
     tabBarIcon: ({focused}) => (
         <TabBarIcon
             focused={focused}

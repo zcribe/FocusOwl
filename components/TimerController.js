@@ -23,27 +23,27 @@ class TimerController extends Component {
             <View style={timerController}>
 
                 <View style={styles.flexColumn}>
-                    <Text style={name}>Keskendu</Text>
+                    <Text style={name}>Focus</Text>
                     <View style={styles.flex}>
-                        <TouchableOpacity title="+" onPress={()=>this.props.incWork()} style={styles.timerButton}>
+                        <TouchableOpacity title="+" onPress={()=>this.props.handleButtonPress('inc', 'work')} style={styles.timerButton}>
                             <Text style={buttonTextAdd}>+</Text>
                         </TouchableOpacity>
                         <Text style={styles.timerLabel}>{this.props.workTimer}</Text>
                         <Text style={subLabel}> min</Text>
-                        <TouchableOpacity title="-" onPress={()=>this.props.decWork()} style={styles.timerButton}>
+                        <TouchableOpacity title="-" onPress={()=>this.props.handleButtonPress('dec', 'work')} style={styles.timerButton}>
                             <Text style={styles.timerButtonText}>-</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
                 <View style={styles.flexColumn}>
-                    <Text style={name}>Paus</Text>
+                    <Text style={name}>Rest</Text>
                     <View style={styles.flex}>
-                        <TouchableOpacity title="+" onPress={()=>this.props.incRest()} style={styles.timerButton}>
+                        <TouchableOpacity title="+" onPress={()=>this.props.handleButtonPress('inc', 'rest')} style={styles.timerButton}>
                             <Text style={buttonTextAdd}>+</Text>
                         </TouchableOpacity>
                         <Text style={styles.timerLabel}>{this.props.restTimer}</Text>
                         <Text style={subLabel}> min</Text>
-                        <TouchableOpacity title="-" onPress={()=>this.props.decRest()} style={styles.timerButton} >
+                        <TouchableOpacity title="-" onPress={()=>this.props.handleButtonPress('dec', 'rest')} style={styles.timerButton} >
                             <Text style={styles.timerButtonText}>-</Text>
                         </TouchableOpacity>
                     </View>

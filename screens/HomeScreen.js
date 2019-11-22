@@ -6,14 +6,20 @@ import * as SQLite from 'expo-sqlite';
 import TimerCounter from "../components/TimerCounter";
 import TimerController from "../components/TimerController";
 
-const ALLOWED_TIME_MIN = 1;
-const ALLOWED_TIME_MAX = 99;
 const SECONDS_IN_MINUTE = 60;
 const MILLISECONDS_IN_SECOND = 1000;
 const PERCENTS_MAX = 100;
+
+const ALLOWED_TIME_MIN = 1;
+const ALLOWED_TIME_MAX = 99;
+
 const VIBRATION_PATTERN = [100, 100, 100];
-const COUNTER_WORK_SECONDS = 25 * 60;
-const COUNTER_REST_SECONDS = 5 * 60;
+
+const COUNTER_WORK_MINUTES = 25;
+const COUNTER_REST_MINUTES = 5;
+const COUNTER_WORK_SECONDS = COUNTER_WORK_MINUTES * SECONDS_IN_MINUTE;
+const COUNTER_REST_SECONDS = COUNTER_REST_MINUTES * SECONDS_IN_MINUTE;
+
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
 
@@ -26,9 +32,9 @@ class HomeScreen extends Component {
             counterRunning: false,
             counterMax: COUNTER_WORK_SECONDS,
             counterType: 'work',
-            counterWork: 25,
-            counterRest: 5,
-            minutes: '25',
+            counterWork: COUNTER_WORK_MINUTES,
+            counterRest: COUNTER_REST_MINUTES,
+            minutes: COUNTER_WORK_MINUTES,
             seconds: '00',
             percentage: 0,
         };
@@ -42,10 +48,7 @@ class HomeScreen extends Component {
         this.swapCounterType = this.swapCounterType.bind(this);
         this.granulateTime = this.granulateTime.bind(this);
         this.percentLeft = this.percentLeft.bind(this);
-        this.incWork = this.incWork.bind(this);
-        this.incRest = this.incRest.bind(this);
-        this.decWork = this.decWork.bind(this);
-        this.decRest = this.decRest.bind(this);
+        this.handleButtonPress = this.handleButtonPress.bind(this);
         this.createDaysEntry = this.createDaysEntry.bind(this);
         this.createSessionEntry = this.createSessionEntry.bind(this);
         this.updateDayEntry = this.updateDayEntry.bind(this);
@@ -55,15 +58,14 @@ class HomeScreen extends Component {
         this.createDaysEntry()
     }
 
-
-
     startCounter() {
+        // Create a counter that calls back to ticking method
         let timer = setInterval(this.tick, MILLISECONDS_IN_SECOND);
         this.setState({timer, counterRunning: true});
     }
 
     controlCounter() {
-        // End condition
+        // Check if the counter has met end conditions
         if (this.state.counter >= this.state.counterMax) {
             this.stopCounter(true);
             this.swapCounterType();
@@ -73,39 +75,46 @@ class HomeScreen extends Component {
 
 
     stopCounter(swapState = false) {
-        // State change
+        // Methods that are called when the timer meets an end condition
         clearInterval(this.state.timer);
         this.setState({counter: 0, counterRunning: false});
 
-        // Create record
         this.createSessionEntry();
-        // Update days entry
         this.updateDayEntry();
 
-        // Effects
         Vibration.vibrate(VIBRATION_PATTERN);
         this.playSound('end');
     };
 
     swapCounterType() {
-        let timerState = this.state.counterType;
+        // Handle swapping counter states
+
+        const timerState = this.state.counterType;
+        const rest = this.state.counterRest;
+        const work = this.state.counterWork;
+        const restMax = rest * SECONDS_IN_MINUTE;
+        const workMax = work * SECONDS_IN_MINUTE;
 
         if (timerState === 'work') {
             this.setState({
                 counterType: 'rest',
-                counterMax: this.state.counterRest * SECONDS_IN_MINUTE
+                counterMax: restMax,
+                minutes: rest,
+                seconds: '00'
             })
         } else if (timerState === 'rest') {
             this.setState({
                 counterType: 'work',
-                counterMax: this.state.counterWork * SECONDS_IN_MINUTE
+                counterMax: workMax,
+                minutes: work,
+                seconds: '00'
             })
         }
 
-        this.granulateTime()
     }
 
     async playSound(sound) {
+        // Sound playback management
         const soundObject = new Audio.Sound();
 
         if (sound === 'end') {
@@ -127,6 +136,7 @@ class HomeScreen extends Component {
     };
 
     tick = () => {
+        // What happens every tick of an counter
         this.setState({
             counter: this.state.counter + 1
         });
@@ -136,80 +146,59 @@ class HomeScreen extends Component {
 
     };
 
+    handleButtonPress(operation, target) {
+        // Handle increasing and decreasing of the counters
+        const currentTimerType = this.state.counterType;
+        const counterWork = this.state.counterWork;
+        const counterRest = this.state.counterRest;
 
-    incWork() {
-        if (this.state.counterWork < ALLOWED_TIME_MAX && this.state.counterType === 'work') {
-            this.setState((prevState, props) => ({
-                counterWork: prevState.counterWork + 1,
-                counterMax: prevState.counterMax + SECONDS_IN_MINUTE,
-
-            }))
-        } else if (this.state.counterWork < ALLOWED_TIME_MAX) {
-            this.setState((prevState, props) => ({
-                counterWork: prevState.counterWork + 1,
-
-            }))
+        // Manage specific counters values
+        if (target === 'work') {
+            if (operation === 'inc' && counterWork < ALLOWED_TIME_MAX) {
+                this.setState((prevState) => ({
+                    counterWork: prevState.counterWork + 1
+                }))
+            } else if (operation === 'dec' && counterWork > ALLOWED_TIME_MIN) {
+                this.setState((prevState) => ({
+                    counterWork: prevState.counterWork - 1
+                }))
+            }
+        } else {
+            if (operation === 'inc' && counterRest < ALLOWED_TIME_MAX) {
+                this.setState((prevState) => ({
+                    counterRest: prevState.counterRest + 1
+                }))
+            } else if (operation === 'dec' && counterRest > ALLOWED_TIME_MIN) {
+                this.setState((prevState) => ({
+                    counterRest: prevState.counterRest - 1
+                }))
+            }
         }
-        this.granulateTime();
-        this.playSound('press')
-    };
 
-    decWork() {
-        if (this.state.counterWork > ALLOWED_TIME_MIN && this.state.counterType === 'work') {
-            this.setState((prevState, props) => ({
-                counterWork: prevState.counterWork - 1,
-                counterMax: prevState.counterMax - SECONDS_IN_MINUTE,
 
-            }))
-        } else if (this.state.counterWork > ALLOWED_TIME_MIN) {
-            this.setState((prevState, props) => ({
-                counterWork: prevState.counterWork - 1,
-
-            }))
+        // Manage the main overall counter values
+        if (currentTimerType === target) {
+            if (operation === 'inc' && counterWork < ALLOWED_TIME_MAX) {
+                this.setState((prevState) => ({
+                    counterMax: prevState.counterMax + SECONDS_IN_MINUTE,
+                    minutes: prevState.minutes + 1
+                }))
+            } else if (operation === 'dec' && counterWork > ALLOWED_TIME_MIN) {
+                this.setState((prevState) => ({
+                    counterMax: prevState.counterMax - SECONDS_IN_MINUTE,
+                    minutes: prevState.minutes - 1
+                }))
+            }
         }
-        this.granulateTime()
+
         this.playSound('press')
-    };
+    }
 
-    incRest() {
-        if (this.state.counterRest < ALLOWED_TIME_MAX && this.state.counterType === 'rest') {
-            this.setState((prevState, props) => ({
-                counterRest: prevState.counterRest + 1,
-                counterMax: prevState.counterMax + SECONDS_IN_MINUTE,
-
-            }));
-            this.granulateTime()
-        } else if (this.state.counterRest < ALLOWED_TIME_MAX) {
-            this.setState((prevState, props) => ({
-                counterRest: prevState.counterRest + 1,
-
-            }))
-        }
-        this.granulateTime()
-        this.playSound('press')
-    };
-
-    decRest() {
-        if (this.state.counterRest > ALLOWED_TIME_MIN && this.state.counterType === 'rest') {
-            this.setState((prevState, props) => ({
-                counterRest: prevState.counterRest - 1,
-                counterMax: prevState.counterMax - SECONDS_IN_MINUTE,
-
-            }))
-        } else if (this.state.counterRest > ALLOWED_TIME_MIN) {
-            this.setState((prevState, props) => ({
-                counterRest: prevState.counterRest - 1,
-
-            }))
-        }
-        this.granulateTime()
-        this.playSound('press')
-    };
 
     granulateTime() {
-        let time, minutes, seconds;
+        let minutes, seconds;
 
-        time = this.state.counterMax - this.state.counter;
+        const time = this.state.counterMax - this.state.counter;
 
         minutes = Math.floor(time / SECONDS_IN_MINUTE);
         seconds = time - minutes * SECONDS_IN_MINUTE;
@@ -224,7 +213,11 @@ class HomeScreen extends Component {
     }
 
     percentLeft() {
-        this.setState({percentage: this.state.counter / this.state.counterMax * PERCENTS_MAX})
+        const current = this.state.counter;
+        const max = this.state.counterMax;
+        const percentage = Math.round(current / max * PERCENTS_MAX);
+
+        this.setState({percentage: percentage})
     }
 
     createDaysEntry() {
@@ -236,15 +229,8 @@ class HomeScreen extends Component {
     }
 
     createSessionEntry() {
-        let length, type;
-
-        type = this.state.counterType;
-
-        if (type === 'work') {
-            length = this.state.counterWork
-        } else {
-            length = this.state.counterRest
-        }
+        const type = this.state.counterType;
+        const length = Math.round(this.state.counter / SECONDS_IN_MINUTE)
 
         DB.transaction(
             tx => {
@@ -261,7 +247,7 @@ class HomeScreen extends Component {
         type = this.state.counterType;
 
         if (type === 'work') {
-            minutes = this.state.counterWork;
+            minutes = Math.round(this.state.counter / SECONDS_IN_MINUTE);
             DB.transaction(
                 tx => {
                     tx.executeSql(`
@@ -272,7 +258,7 @@ class HomeScreen extends Component {
                 }
             )
         } else {
-            minutes = this.state.counterRest
+            minutes = Math.round(this.state.counter / SECONDS_IN_MINUTE);
             DB.transaction(
                 tx => {
                     tx.executeSql(`
@@ -291,38 +277,32 @@ class HomeScreen extends Component {
     render() {
         let button, bg, order, buttonTheme, buttonThemeText, orderButton;
 
-
         if (this.state.counterType === 'work') {
             bg = require('.././assets/images/5.jpg')
-            order = 'Keskendu'
+            order = 'Focus'
             buttonTheme = styles.mainButton
             buttonThemeText = styles.mainButtonText
         } else {
             bg = require('.././assets/images/1.jpg')
-            order = 'Puhka'
+            order = 'Rest'
             buttonTheme = styles.mainButtonAlt
             buttonThemeText = styles.mainButtonTextAlt
         }
 
         if (this.state.counterRunning === true) {
             button = <TouchableOpacity style={buttonTheme} onPress={this.stopCounter}>
-                <Text style={buttonThemeText}>Peata</Text>
+                <Text style={buttonThemeText}>Stop</Text>
             </TouchableOpacity>
         } else {
             button = <TouchableOpacity style={buttonTheme} onPress={this.startCounter}>
-                <Text style={buttonThemeText}>Alusta</Text>
+                <Text style={buttonThemeText}>Start</Text>
             </TouchableOpacity>
         }
 
-        if (this.state.counterType === 'work') {
-            orderButton = <TouchableOpacity  onPress={this.swapCounterType}>
-                <Text style={styles.orderText}>{order}</Text>
-            </TouchableOpacity>
-        } else {
-            orderButton = <TouchableOpacity  onPress={this.swapCounterType}>
-                <Text style={styles.orderText}>{order}</Text>
-            </TouchableOpacity>
-        }
+
+        orderButton = <TouchableOpacity onPress={this.swapCounterType}>
+            <Text style={styles.orderText}>{order}</Text>
+        </TouchableOpacity>
 
         return (
 
@@ -346,18 +326,13 @@ class HomeScreen extends Component {
                             workTimer={this.state.counterWork}
                             restTimer={this.state.counterRest}
                             counterType={this.state.counterType}
-                            incWork={this.incWork}
-                            decWork={this.decWork}
-                            incRest={this.incRest}
-                            decRest={this.decRest}
+                            handleButtonPress={this.handleButtonPress}
                         />
                     </View>
                     <View style={styles.mainButtonContainer}>
                         {button}
                     </View>
                 </ScrollView>
-
-
             </ImageBackground>
 
         );

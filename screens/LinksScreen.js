@@ -5,24 +5,6 @@ import * as SQLite from "expo-sqlite";
 
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
-
-
-const commitsData = [
-    {date: "2019-08-02", workCount: 1},
-    {date: "2019-08-03", count: 2},
-    {date: "2019-08-04", count: 3},
-    {date: "2019-08-05", count: 4},
-    {date: "2019-08-06", count: 5},
-    {date: "2019-08-30", count: 2},
-    {date: "2019-08-31", count: 3},
-    {date: "2019-09-01", count: 2},
-    {date: "2019-09-02", count: 4},
-    {date: "2019-09-05", count: 2},
-    {date: "2019-09-30", count: 4}
-];
-
-const data = {}
-
 const screenWidth = Dimensions.get("window").width;
 
 const chartConfig = {
@@ -60,6 +42,7 @@ export default class LinksScreen extends Component {
     }
 
     objArrToArr(objArr) {
+        // Helper method for converting array of objects to a simple array
         let outArr = [];
         for (let i = 0; i < objArr.length; i++) {
             outArr.push(objArr[i]["workMinutes"])
@@ -68,6 +51,8 @@ export default class LinksScreen extends Component {
     }
 
     readData() {
+        // Reads the data in from DB that is needed for graph generation
+
         // READ TODAY
         DB.transaction(tx => {
             tx.executeSql(`
