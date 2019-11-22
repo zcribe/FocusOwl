@@ -32,8 +32,9 @@ export default class LinksScreen extends Component {
             threeMonthsCounts: [{}]
         };
 
-        this.readData = this.readData.bind(this)
-        this.objArrToArr = this.objArrToArr.bind(this)
+        this.readData = this.readData.bind(this);
+        this.objArrToArr = this.objArrToArr.bind(this);
+        this.generateDayLabels = this.generateDayLabels.bind(this);
         this.readData()
     }
 
@@ -48,6 +49,38 @@ export default class LinksScreen extends Component {
             outArr.push(objArr[i]["workMinutes"])
         }
         return outArr
+    }
+
+    generateDayLabels() {
+        const todayDay = new Date().getDay()
+        let labelNrArray = [todayDay - 6, todayDay - 5, todayDay - 4, todayDay - 3, todayDay - 2, todayDay - 1, todayDay]
+        let labelNameArray = [];
+
+        for (let i = 0; i < labelNrArray.length; i++) {
+            let labelItem = labelNrArray[i];
+
+            if (labelItem <= 0) {
+                labelItem = labelItem + 7
+            }
+
+            if (labelItem === 1) {
+                labelNameArray.push('Mon')
+            } else if (labelItem === 2) {
+                labelNameArray.push('Tue')
+            } else if (labelItem === 3) {
+                labelNameArray.push('Wen')
+            } else if (labelItem === 4) {
+                labelNameArray.push('Thu')
+            } else if (labelItem === 5) {
+                labelNameArray.push('Fri')
+            } else if (labelItem === 6) {
+                labelNameArray.push('Sat')
+            } else if (labelItem === 7) {
+                labelNameArray.push('Sun')
+            }
+        }
+
+        return labelNameArray
     }
 
     readData() {
@@ -68,7 +101,6 @@ export default class LinksScreen extends Component {
                             totalMinutes: totalMinutes
                         })
                     }
-
                 })
         });
 
@@ -84,10 +116,8 @@ export default class LinksScreen extends Component {
                     this.setState({
                         weekMinutes: weekMinutes
                     })
-                },
-                e => console.log('ERROR:', e))
-        }, null, (trans, res) => {
-        });
+                })
+        }, );
 
         // READ THREE MONTHS
         DB.transaction(tx => {
@@ -101,44 +131,19 @@ export default class LinksScreen extends Component {
                     this.setState({
                         threeMonthsCounts: res['rows']['_array']
                     })
-                },
-                e => console.log('ERROR:', e))
-        }, null, (trans, res) => {
+                })
         });
     }
 
     render() {
         let data = {
-            labels: ["Mon", "Tue", "Wen", "Thu", "Fri", "Sat", "Sun"],
+            labels: this.generateDayLabels(),
             datasets: [
                 {
-                    data: [
-                        200,
-                        150,
-                        600,
-                        777,
-                        432,
-                        667
-                    ]
+                    data: this.state.weekMinutes
                 }
             ]
         };
-        data['datasets'][0]['data'] = this.state.weekMinutes;
-
-        const a = [
-            {
-                "date": "2019-11-12",
-                "workCount": 0,
-            },
-            {
-                "date": "2019-11-13",
-                "workCount": 0,
-            },
-            {
-                "date": "2019-11-14",
-                "workCount": 100,
-            },
-        ]
 
 
         return (

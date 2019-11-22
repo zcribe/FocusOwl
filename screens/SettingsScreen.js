@@ -5,29 +5,33 @@ import * as SQLite from "expo-sqlite";
 
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
+const LINK_EMAIL = 'mailto:xxx@hot.ee';
+const LINK_WEBSITE = 'https://zcribe.github.io/FocusOwl/';
+const LINK_SOURCE = 'https://github.com/zcribe/FocusOwl';
+const LINK_WIKI = 'https://en.wikipedia.org/wiki/Pomodoro_Technique';
 
 export default class SettingsScreen extends Component {
     constructor(props) {
-        super(props)
+        super(props);
         this._handlePress = this._handlePress.bind(this);
         this._deleteData = this._deleteData.bind(this);
     }
 
     _handlePress(type = 'website') {
         if (type === 'email') {
-            Linking.openURL('mailto:xxx@hot.ee')
+            Linking.openURL(LINK_EMAIL)
         } else if (type === 'website') {
-            Linking.openURL('https://zcribe.github.io/FocusOwl/')
+            Linking.openURL(LINK_WEBSITE)
         } else if (type === 'delete') {
             this._deleteData()
         } else if (type === 'privacy') {
             this.props.navigation.navigate('Privacy')
         } else if (type === 'source') {
-            Linking.openURL('https://github.com/zcribe/FocusOwl')
+            Linking.openURL(LINK_SOURCE)
         } else if (type === 'license') {
             this.props.navigation.navigate('Licence')
         } else if (type === 'pomodoro') {
-            Linking.openURL('https://en.wikipedia.org/wiki/Pomodoro_Technique')
+            Linking.openURL(LINK_WIKI)
         }
     }
 
@@ -83,19 +87,20 @@ export default class SettingsScreen extends Component {
                 </TouchableHighlight>
                 <Text style={styles.sectionHeader}>Privacy</Text>
                 <TouchableHighlight style={styles.item} onPress={() => {
-                    this._handlePress('delete')
+                    this._handlePress('privacy')
                 }}>
-                    <Text style={styles.itemText}>Delete saved data</Text>
+                    <Text style={styles.itemText}>Privacy policy</Text>
                 </TouchableHighlight>
+
                 <TouchableHighlight style={styles.item} onPress={() => {
                     this._handlePress('export')
                 }}>
                     <Text style={styles.itemText}>Export saved data</Text>
                 </TouchableHighlight>
                 <TouchableHighlight style={styles.item} onPress={() => {
-                    this._handlePress('privacy')
+                    this._handlePress('delete')
                 }}>
-                    <Text style={styles.itemText}>Privacy policy</Text>
+                    <Text style={styles.itemText}>Delete saved data</Text>
                 </TouchableHighlight>
                 <Text style={styles.sectionHeader}>About</Text>
                 <TouchableHighlight style={styles.item} onPress={() => {
@@ -114,7 +119,6 @@ export default class SettingsScreen extends Component {
 }
 
 
-
 SettingsScreen.navigationOptions = {
     title: 'Settings',
     headerStyle: {
@@ -129,7 +133,6 @@ SettingsScreen.navigationOptions = {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingTop: 22,
     },
     sectionHeader: {
         paddingTop: 10,
