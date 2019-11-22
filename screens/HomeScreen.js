@@ -126,7 +126,7 @@ class HomeScreen extends Component {
             }
         } else if (sound === 'press') {
             try {
-                await soundObject.loadAsync(require('.././assets/sounds/press.mp3'));
+                await soundObject.loadAsync(require('.././assets/sounds/button2.wav'));
                 await soundObject.playAsync();
             } catch (error) {
                 // An error occurred!
