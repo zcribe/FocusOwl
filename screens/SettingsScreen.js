@@ -3,6 +3,7 @@ import {ScrollView, StyleSheet, Text, TouchableHighlight} from 'react-native';
 import {Linking} from "expo";
 import * as SQLite from "expo-sqlite";
 
+
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
 const LINK_EMAIL = 'mailto:xxx@hot.ee';
@@ -29,7 +30,7 @@ export default class SettingsScreen extends Component {
         } else if (type === 'source') {
             Linking.openURL(LINK_SOURCE)
         } else if (type === 'license') {
-            this.props.navigation.navigate('Licence')
+            this.props.navigation.navigate('License')
         } else if (type === 'pomodoro') {
             Linking.openURL(LINK_WIKI)
         }
@@ -143,7 +144,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         backgroundColor: '#1A2640',
-        color:'rgba(247,247,247,1.0)'
+        color:'#619eff'
     },
     item: {
         padding: 10,

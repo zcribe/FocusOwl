@@ -388,6 +388,7 @@ class HomeScreen extends Component {
                     </View>
                     <View>
                         {orderButton}
+                        <Text style={{color:'#99a4be'}}>Swap timer</Text>
                     </View>
                     <View style={styles.controllerContainer}>
                         <TimerController
@@ -425,6 +426,7 @@ const
 
 
         },
+
         codeHighlightContainer: {
             backgroundColor: 'rgba(0,0,0,0.05)',
             borderRadius: 3,

@@ -95,12 +95,12 @@ const styles = StyleSheet.create({
         color: '#E1E4F3'
     },
     timerSubLabel:{
-        fontSize: 8,
+        fontSize: 10,
         fontWeight: 'bold',
         color: '#485683'
     },
     timerSubLabelAlt:{
-        fontSize: 8,
+        fontSize: 10,
         fontWeight: 'bold',
         color: '#378336'
     },
