@@ -1,18 +1,18 @@
 {
   "expo": {
     "name": "FocusOwl",
-    "slug": "focusowl",
+    "slug": "focus-owl",
     "privacy": "public",
     "sdkVersion": "35.0.0",
     "platforms": [
       "ios",
       "android"
     ],
-    "version": "1.0.0",
+    "version": "0.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/repohead.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,7 +28,9 @@
     "android": {
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
-      }
+      },
+      "package": "www.erlend.ee",
+      "permissions": []
     },
     "androidStatusBar": {
       "backgroundColor": "#1A2640",

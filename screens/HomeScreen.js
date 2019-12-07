@@ -51,7 +51,11 @@ class HomeScreen extends Component {
         this.handleButtonPress = this.handleButtonPress.bind(this);
         this.createDaysEntry = this.createDaysEntry.bind(this);
         this.createSessionEntry = this.createSessionEntry.bind(this);
+        this.createSessionsTable = this.createSessionsTable.bind(this);
+        this.createDaysTable = this.createDaysTable.bind(this);
+        this.readDaysTable = this.readDaysTable.bind(this);
         this.updateDayEntry = this.updateDayEntry.bind(this);
+        this.readDayEntry = this.updateDayEntry.bind(this);
     }
 
     componentDidMount() {
@@ -222,10 +226,11 @@ class HomeScreen extends Component {
 
     createDaysEntry() {
         DB.transaction(tx => {
-            tx.executeSql(`
-                INSERT INTO days
-                VALUES (DATE('now'), ?, ?, ?, ?)`, [0, 0, 0, 0])
-        })
+                tx.executeSql(`
+                    INSERT INTO days
+                    VALUES (DATE('now'), ?, ?, ?, ?)`, [0, 0, 0, 0])
+            }
+        )
     }
 
     createSessionEntry() {
@@ -241,10 +246,53 @@ class HomeScreen extends Component {
         )
     }
 
+    createDaysTable() {
+        DB.transaction(
+            tx => {
+                tx.executeSql(`CREATE TABLE IF NOT EXISTS days
+                               (
+                                   date        DATE UNIQUE NOT NULL,
+                                   workMinutes INTEGER,
+                                   workCount   INTEGER,
+                                   restMinutes INTEGER,
+                                   restCount   INTEGER
+                               )`)
+            }
+        );
+    }
+
+    readDaysTable() {
+        DB.transaction(
+            tx => {
+                tx.executeSql(`SELECT * FROM days`)
+            }
+        );
+    }
+
+
+
+    createSessionsTable() {
+        DB.transaction(
+            tx => {
+                tx.executeSql(`CREATE TABLE IF NOT EXISTS sessions
+                               (
+                                   date   DATE UNIQUE NOT NULL,
+                                   type   TEXT,
+                                   length INTEGER
+                               )`)
+            }
+        )
+    }
+
     updateDayEntry() {
+        this.createSessionsTable();
+        this.createDaysTable();
+
+
         let minutes, type;
 
         type = this.state.counterType;
+        console.log('Updated')
 
         if (type === 'work') {
             minutes = Math.round(this.state.counter / SECONDS_IN_MINUTE);
@@ -255,7 +303,7 @@ class HomeScreen extends Component {
                         SET workMinutes = workMinutes + ?,
                             workCount   = workCount + 1
                         WHERE DATE = DATE('now')`, [minutes])
-                }
+                }, error => console.log(error)
             )
         } else {
             minutes = Math.round(this.state.counter / SECONDS_IN_MINUTE);
@@ -271,6 +319,26 @@ class HomeScreen extends Component {
         }
 
 
+    }
+
+    readDayEntry() {
+        // READ TODAY
+        DB.transaction(tx => {
+            tx.executeSql(`
+                        SELECT workMinutes
+                        FROM days
+                        WHERE date = DATE('now')`,
+                null,
+                (trans, res) => {
+
+                    if (res['rows']['length'] > 0) {
+                        let totalMinutes = res['rows']['_array'][0]['workMinutes']
+                        this.setState({
+                            totalMinutes: totalMinutes
+                        })
+                    }
+                })
+        });
     }
 
 

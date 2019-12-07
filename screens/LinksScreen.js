@@ -6,6 +6,7 @@ import * as SQLite from "expo-sqlite";
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
 const screenWidth = Dimensions.get("window").width;
+const screenHeight = Dimensions.get("window").height;
 
 const chartConfig = {
     backgroundColor: "#8293FF",
@@ -160,11 +161,12 @@ export default class LinksScreen extends Component {
                         <Text style={styles.chartTitle}>Week</Text>
                         <LineChart
                             data={data}
-                            width={screenWidth} // from react-native
-                            height={220}
+                            width={screenWidth}
+                            height={screenHeight / 3}
                             yAxisSuffix={"min"}
                             chartConfig={chartConfig}
                             bezier
+                            animate
                             style={{
                                 marginVertical: 8
                             }}
@@ -172,8 +174,8 @@ export default class LinksScreen extends Component {
                     </View>
                     <View style={styles.containerMonths}>
                         <Text style={styles.chartTitle}>Three months</Text>
-                        <ContributionGraph values={this.state.threeMonthsCounts} endDate={new Date()}
-                                           numDays={90} width={screenWidth} height={220} chartConfig={chartConfig}/>
+                        <ContributionGraph style={styles.months} values={this.state.threeMonthsCounts} endDate={new Date()}
+                                           numDays={90} width={screenWidth *.96} height={screenHeight / 3} chartConfig={chartConfig}/>
                     </View>
                 </ScrollView>
             </ImageBackground>
@@ -196,7 +198,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 15,
-        // backgroundColor: '#1A2640',
     },
     containerDay: {
         backgroundColor: '#272F50',
@@ -238,7 +239,8 @@ const styles = StyleSheet.create({
     },
     chartTitle: {
         color: '#e2eef3',
-        fontWeight: '700'
+        fontWeight: '700',
+        padding: 10
     },
     timeUnit: {
         color: '#9FA6C9',
@@ -249,4 +251,6 @@ const styles = StyleSheet.create({
         flex: 1,
         resizeMode: 'stretch'
     },
+    months: {
+    }
 });

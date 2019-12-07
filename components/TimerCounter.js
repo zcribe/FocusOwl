@@ -37,7 +37,7 @@ class TimerCounter extends PureComponent {
                     <Text style={{
                         fontSize: text,
                         color: '#E1E4F3'
-                    }} accessibilityRole="timer">{`${this.props.minutes} : ${this.props.seconds}`}</Text>
+                    }} >{`${this.props.minutes} : ${this.props.seconds}`}</Text>
                 </ProgressCircle>
             </View>
         );
