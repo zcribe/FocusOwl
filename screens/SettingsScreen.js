@@ -133,6 +133,7 @@ SettingsScreen.navigationOptions = {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: '#1e3856'
     },
     sectionHeader: {
         paddingTop: 10,
@@ -141,13 +142,16 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         fontSize: 14,
         fontWeight: 'bold',
-        backgroundColor: 'rgba(247,247,247,1.0)',
+        backgroundColor: '#1A2640',
+        color:'rgba(247,247,247,1.0)'
     },
     item: {
         padding: 10,
         height: 44,
+        backgroundColor: '#1e3856',
     },
     itemText: {
         fontSize: 18,
+        color:'rgba(247,247,247,1.0)'
     }
 });
