@@ -12,6 +12,8 @@ import PrivacyScreen from "../screens/PrivacyScreen";
 const config = Platform.select({
     web: {headerMode: 'screen'},
     default: {},
+    pressColor: '#8293FF',//for click (ripple) effect color
+    style: {color:'#8293FF'}
 });
 
 const HomeStack = createStackNavigator(

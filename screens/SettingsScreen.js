@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {ScrollView, StyleSheet, Text, TouchableHighlight} from 'react-native';
 import {Linking} from "expo";
 import * as SQLite from "expo-sqlite";
+import {AdMobBanner} from "expo-ads-admob";
 
 
 const DB_NAME = 'sessionStore';
@@ -114,6 +115,7 @@ export default class SettingsScreen extends Component {
                 }}>
                     <Text style={styles.itemText}>Licence</Text>
                 </TouchableHighlight>
+                <AdMobBanner style={{position:'absolute', bottom:0}}  adUnitID={'ca-app-pub-6870019974253956/4241465282'} bannerSize='smartBannerPortrait'/>
             </ScrollView>
         );
     }
@@ -134,7 +136,7 @@ SettingsScreen.navigationOptions = {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1e3856'
+        backgroundColor: '#272F50'
     },
     sectionHeader: {
         paddingTop: 10,
@@ -144,15 +146,15 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         backgroundColor: '#1A2640',
-        color:'#619eff'
+        color:'#8293FF'
     },
     item: {
         padding: 10,
         height: 44,
-        backgroundColor: '#1e3856',
+        backgroundColor: '#272F50',
     },
     itemText: {
         fontSize: 18,
-        color:'rgba(247,247,247,1.0)'
+        color:'#E1E4F3'
     }
 });

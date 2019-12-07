@@ -388,7 +388,7 @@ class HomeScreen extends Component {
                     </View>
                     <View>
                         {orderButton}
-                        <Text style={{color:'#99a4be'}}>Swap timer</Text>
+                        <Text style={{color:'#9FA6C9'}}>Swap timer</Text>
                     </View>
                     <View style={styles.controllerContainer}>
                         <TimerController
