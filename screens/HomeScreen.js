@@ -292,7 +292,6 @@ class HomeScreen extends Component {
         let minutes, type;
 
         type = this.state.counterType;
-        console.log('Updated')
 
         if (type === 'work') {
             minutes = Math.round(this.state.counter / SECONDS_IN_MINUTE);

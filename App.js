@@ -1,62 +1,68 @@
-import { AppLoading } from 'expo';
-import { Asset } from 'expo-asset';
+import {AppLoading} from 'expo';
 import * as Font from 'expo-font';
-import React, { useState } from 'react';
-import {ImageBackground, Platform, StatusBar, StyleSheet, View} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, {useState} from 'react';
+import {StatusBar, StyleSheet, View} from 'react-native';
+import {Ionicons} from '@expo/vector-icons';
+import * as Sentry from 'sentry-expo';
 
 import AppNavigator from './navigation/AppNavigator';
+
+Sentry.init({
+    dsn: 'https://e2db542092f34f62992911184e6400dc@sentry.io/1852330',
+    enableInExpoDevelopment: true,
+    debug: true
+});
 
 
 export default function App(props) {
 
 
-  const [isLoadingComplete, setLoadingComplete] = useState(false);
+    const [isLoadingComplete, setLoadingComplete] = useState(false);
 
-  if (!isLoadingComplete && !props.skipLoadingScreen) {
-    return (
-      <AppLoading
-        startAsync={loadResourcesAsync}
-        onError={handleLoadingError}
-        onFinish={() => handleFinishLoading(setLoadingComplete)}
-      />
-    );
-  } else {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#1A2640"  />
-        <AppNavigator />
-      </View>
-    );
-  }
+    if (!isLoadingComplete && !props.skipLoadingScreen) {
+        return (
+            <AppLoading
+                startAsync={loadResourcesAsync}
+                onError={handleLoadingError}
+                onFinish={() => handleFinishLoading(setLoadingComplete)}
+            />
+        );
+    } else {
+        return (
+            <View style={styles.container}>
+                <StatusBar barStyle="light-content" backgroundColor="#1A2640"/>
+                <AppNavigator/>
+            </View>
+        );
+    }
 }
 
 async function loadResourcesAsync() {
-  await Promise.all([
-    Font.loadAsync({
-      // This is the font that we are using for our tab bar
-      ...Ionicons.font,
-      'space-mono': require('./assets/fonts/IBMPlexSans-Regular.ttf'),
-    }),
-  ]);
+    await Promise.all([
+        Font.loadAsync({
+            // This is the font that we are using for our tab bar
+            ...Ionicons.font,
+            'space-mono': require('./assets/fonts/IBMPlexSans-Regular.ttf'),
+        }),
+    ]);
 }
 
 function handleLoadingError(error) {
-  // In this case, you might want to report the error to your error reporting
-  // service, for example Sentry
-  console.warn(error);
+    // In this case, you might want to report the error to your error reporting
+    // service, for example Sentry
+    console.warn(error);
 }
 
 function handleFinishLoading(setLoadingComplete) {
-  setLoadingComplete(true);
+    setLoadingComplete(true);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1A2640',
-  },
-  bg: {
+    container: {
+        flex: 1,
+        backgroundColor: '#1A2640',
+    },
+    bg: {
         flex: 1,
         resizeMode: 'cover'
     },

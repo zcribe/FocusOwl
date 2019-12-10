@@ -2,14 +2,15 @@
   "expo": {
     "name": "FocusOwl",
     "slug": "focus-owl",
-    "privacy": "public",
+    "description": "Focus timer app to optimize work and study sessions.",
+    "privacy": "unlisted",
     "sdkVersion": "35.0.0",
+    "githubUrl": "https://github.com/zcribe/FocusOwl",
     "platforms": [
       "ios",
       "android"
     ],
-    "version": "0.0.1",
-    "orientation": "portrait",
+    "version": "0.0.3",
     "icon": "./assets/images/logo.png",
     "splash": {
       "image": "./assets/images/repohead.png",
@@ -26,17 +27,30 @@
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 2,
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+        "googleMobileAdsAppId": "ca-app-pub-6870019974253956~2352818487"
       },
       "package": "www.erlend.ee",
-      "permissions": []
+      "permissions": ["VIBRATE"]
     },
     "androidStatusBar": {
       "backgroundColor": "#1A2640",
       "barStyle": "dark-content"
     },
-    "primaryColor": "#1A2640"
+    "primaryColor": "#1A2640",
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "Erlend",
+            "project": "FocusOwl",
+            "authToken": "b5c889e674e74bdea375f87d6a948243a9e89b9f8607404eb563a29a5990bada"
+          }
+        }
+      ]
+    }
 
   }
 }
