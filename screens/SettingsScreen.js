@@ -115,7 +115,7 @@ export default class SettingsScreen extends Component {
                 }}>
                     <Text style={styles.itemText}>Licence</Text>
                 </TouchableHighlight>
-                <AdMobBanner style={{position:'absolute', bottom:0}}  adUnitID={'ca-app-pub-6870019974253956/4241465282'} bannerSize='smartBannerPortrait'/>
+                <AdMobBanner adUnitID={'ca-app-pub-6870019974253956/4241465282'} bannerSize='smartBannerPortrait'/>
             </ScrollView>
         );
     }

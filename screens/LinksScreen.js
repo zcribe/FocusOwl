@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {Dimensions, ImageBackground, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {ContributionGraph, LineChart} from "react-native-chart-kit";
 import * as SQLite from "expo-sqlite";
+import {AdMobBanner} from "expo-ads-admob";
 
 const DB_NAME = 'sessionStore';
 const DB = SQLite.openDatabase(DB_NAME);
@@ -177,6 +178,8 @@ export default class LinksScreen extends Component {
                         <ContributionGraph style={styles.months} values={this.state.threeMonthsCounts} endDate={new Date()}
                                            numDays={90} width={screenWidth *.96} height={screenHeight / 3} chartConfig={chartConfig}/>
                     </View>
+                    <AdMobBanner adUnitID={'ca-app-pub-6870019974253956/8982139159'} bannerSize='smartBannerPortrait'/>
+
                 </ScrollView>
             </ImageBackground>
         );
