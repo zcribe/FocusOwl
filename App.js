@@ -2,8 +2,8 @@ import {AppLoading} from 'expo';
 import * as Font from 'expo-font';
 import React, {useState} from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';
-import {Ionicons} from '@expo/vector-icons';
 import * as Sentry from 'sentry-expo';
+import {Ionicons} from "@expo/vector-icons";
 
 import AppNavigator from './navigation/AppNavigator';
 
@@ -15,6 +15,7 @@ Sentry.init({
 
 
 export default function App(props) {
+
 
 
     const [isLoadingComplete, setLoadingComplete] = useState(false);
@@ -40,9 +41,8 @@ export default function App(props) {
 async function loadResourcesAsync() {
     await Promise.all([
         Font.loadAsync({
-            // This is the font that we are using for our tab bar
-            ...Ionicons.font,
             'space-mono': require('./assets/fonts/IBMPlexSans-Regular.ttf'),
+            ...Ionicons.font
         }),
     ]);
 }
