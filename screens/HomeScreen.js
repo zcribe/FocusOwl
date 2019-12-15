@@ -83,8 +83,9 @@ class HomeScreen extends Component {
         clearInterval(this.state.timer);
         this.setState({counter: 0, counterRunning: false});
 
-        this.createSessionEntry();
-        this.updateDayEntry();
+        // DEBUG APP CRASH
+        // this.createSessionEntry();
+        // this.updateDayEntry();
 
         Vibration.vibrate(VIBRATION_PATTERN);
         this.playSound('end');
