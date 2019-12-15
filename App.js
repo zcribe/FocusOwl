@@ -4,6 +4,7 @@ import React, {useState} from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';
 import * as Sentry from 'sentry-expo';
 import {Ionicons} from "@expo/vector-icons";
+import Constants from 'expo-constants';
 
 import AppNavigator from './navigation/AppNavigator';
 
@@ -12,6 +13,8 @@ Sentry.init({
     enableInExpoDevelopment: true,
     debug: true
 });
+Sentry.setRelease(Constants.manifest.revisionId);
+
 
 
 export default function App(props) {

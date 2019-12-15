@@ -10,7 +10,7 @@
       "ios",
       "android"
     ],
-    "version": "0.0.3",
+    "version": "0.0.4",
     "icon": "./assets/images/logo.png",
     "splash": {
       "image": "./assets/images/repohead.png",
@@ -27,14 +27,12 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-6870019974253956~2352818487"
       },
       "package": "www.erlend.ee",
-      "permissions": [
-        "VIBRATE"
-      ]
+      "permissions": ["VIBRATE", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "androidStatusBar": {
       "backgroundColor": "#1A2640",
@@ -46,9 +44,9 @@
         {
           "file": "sentry-expo/upload-sourcemaps",
           "config": {
-            "organization": "Erlend",
-            "project": "FocusOwl",
-            "authToken": "b5c889e674e74bdea375f87d6a948243a9e89b9f8607404eb563a29a5990bada"
+            "organization": "erlend",
+            "project": "focusowl",
+            "authToken": "0631064ff27e40599b19092c6bc3df58c8ad612c81294818b069392d13366429"
           }
         }
       ]
