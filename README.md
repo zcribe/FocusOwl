@@ -3,6 +3,27 @@
 # FocusOwl
 ##### A simple and elegant productivity tool built with React-Native
 
+### Running
+[Node.js](https://nodejs.org/en/) and [Expo CLI](https://expo.io/learn) are required for running.
+
+Clone or download the repo. 
+
+Run in CMD, Powershell or Bash:
+
+```
+    expo install
+```
+Wait for the download to finish and the run:
+
+```
+    expo start
+```
+### Reasoning
+
+The goal of this project was to get one foot into the Reac-Native and Expo world. In order to test out the available tooling. 
+
+
+
 ### Concept
 
 The core idea is based off the [Pomodoro Technique](https://en.wikipedia.org/wiki/Pomodoro_Technique) developed by Francesco Cirillo. 
@@ -14,9 +35,8 @@ It aims to implement the core technique.
 5. If you have fewer than four checkmarks, take a short break (3–5 minutes), then go to step 2.
 6. After four pomodoros, take a longer break (15–30 minutes), reset your checkmark count to zero, then go to step 1.
 
-### Reasoning
 
-The goal of this project was to get one foot into the Reac-Native and Expo world. In order to test out the available tooling. 
+
 
 ### Some images
 ##### Function Demo
