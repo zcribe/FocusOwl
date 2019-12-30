@@ -18,10 +18,12 @@ It aims to implement the core technique.
 The goal of this project was to get one foot into the Reac-Native and Expo world. In order to test out the available tooling. 
 
 ### Some images
-###### Function Demo
+##### Function Demo
 ![Function Demo](docs/images/functionImage.jpg)
 
+##### Screens
 
-|Home | Stats|
-:-------------------------:|:-------------------------:
-![First Page](docs/images/tablet-ees-downscale.jpg)|![Second Page](docs/images/tablet-taga-downscale.jpg)
+
+|Home | Statistics | Settings |
+:-------------------------:|:-------------------------:|:-------------------------:
+![Home](docs/images/home.png)|![Statistics](docs/images/stats.png)|![Settings](docs/images/settings.png)
