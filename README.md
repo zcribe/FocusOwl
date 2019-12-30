@@ -26,4 +26,4 @@ The goal of this project was to get one foot into the Reac-Native and Expo world
 
 |Home | Statistics | Settings |
 :-------------------------:|:-------------------------:|:-------------------------:
-![Home](docs/images/home.png)|![Statistics](docs/images/stats.png)|![Settings](docs/images/settings.png)
+![Home](docs/images/home.PNG)|![Statistics](docs/images/stats.PNG)|![Settings](docs/images/settings.PNG)
