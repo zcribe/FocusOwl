@@ -22,6 +22,7 @@ The goal of this project was to get one foot into the Reac-Native and Expo world
 ![Function Demo](docs/images/functionImage.jpg)
 
 ##### Screens
+The application is split into three seperate screens. Home, statistics and settings. Statistics and settings page have an implementation of the Google Ads integration. 
 
 
 |Home | Statistics | Settings |
