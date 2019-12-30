@@ -8,7 +8,7 @@ class TimerCounter extends PureComponent {
     render() {
         let color, shadowColor, bgColor;
         const screenWidth = Math.round(Dimensions.get('window').width)
-        const radius = screenWidth / 6;
+        const radius = screenWidth / 4;
         const border = screenWidth / 24;
         const text = screenWidth / 15;
 
