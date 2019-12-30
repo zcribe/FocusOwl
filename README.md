@@ -20,6 +20,6 @@ The goal of this project was to get one foot into the Reac-Native and Expo world
 ### Some images
 ![Function Demo](docs/images/functionImage.jpg)
 
-![First Page](docs/images/tablet-ees.jpg)
+![First Page](docs/images/tablet-ees-downscale.jpg)
 
-![Second Page](docs/images/tablet-taga.jpg)
+![Second Page](docs/images/tablet-taga-downscale.jpg)
