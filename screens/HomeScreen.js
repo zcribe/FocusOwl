@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {ImageBackground, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, Vibration, View} from 'react-native';
 import {Audio} from "expo-av";
 import * as SQLite from 'expo-sqlite';
+import {AsyncStorage} from 'react-native';
 
 import TimerCounter from "../components/TimerCounter";
 import TimerController from "../components/TimerController";
@@ -84,11 +85,12 @@ class HomeScreen extends Component {
         this.setState({counter: 0, counterRunning: false});
 
         // DEBUG APP CRASH
-        // this.createSessionEntry();
-        // this.updateDayEntry();
+        this.createSessionEntry();
+        this.updateDayEntry();
 
         Vibration.vibrate(VIBRATION_PATTERN);
-        this.playSound('end');
+        // JANK
+        // this.playSound('end');
     };
 
     swapCounterType() {
@@ -232,7 +234,10 @@ class HomeScreen extends Component {
                     VALUES (DATE('now'), ?, ?, ?, ?)`, [0, 0, 0, 0])
             }
         )
+
     }
+
+
 
     createSessionEntry() {
         const type = this.state.counterType;
@@ -246,6 +251,14 @@ class HomeScreen extends Component {
             }
         )
     }
+
+    async _storeSessionEntry() {
+        try {
+            await AsyncStorage.setItem('@sessions:key', 'I like to save it.');
+        } catch (error) {
+            // Error saving data
+        }
+    };
 
     createDaysTable() {
         DB.transaction(
@@ -265,11 +278,11 @@ class HomeScreen extends Component {
     readDaysTable() {
         DB.transaction(
             tx => {
-                tx.executeSql(`SELECT * FROM days`)
+                tx.executeSql(`SELECT *
+                               FROM days`)
             }
         );
     }
-
 
 
     createSessionsTable() {
@@ -388,7 +401,7 @@ class HomeScreen extends Component {
                     </View>
                     <View>
                         {orderButton}
-                        <Text style={{color:'#9FA6C9'}}>Swap timer</Text>
+                        <Text style={{color: '#9FA6C9'}}>Swap timer</Text>
                     </View>
                     <View style={styles.controllerContainer}>
                         <TimerController
