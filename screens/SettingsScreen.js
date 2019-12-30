@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {ScrollView, StyleSheet, Text, TouchableHighlight} from 'react-native';
+import {ScrollView, StyleSheet, Text, TouchableHighlight, View} from 'react-native';
 import {Linking} from "expo";
 import * as SQLite from "expo-sqlite";
 import {AdMobBanner} from "expo-ads-admob";
@@ -30,7 +30,7 @@ export default class SettingsScreen extends Component {
             this.props.navigation.navigate('Privacy')
         } else if (type === 'source') {
             Linking.openURL(LINK_SOURCE)
-        } else if (type === 'license') {
+        } else if (type === 'licence') {
             this.props.navigation.navigate('License')
         } else if (type === 'pomodoro') {
             Linking.openURL(LINK_WIKI)
@@ -115,7 +115,10 @@ export default class SettingsScreen extends Component {
                 }}>
                     <Text style={styles.itemText}>Licence</Text>
                 </TouchableHighlight>
-                <AdMobBanner adUnitID={'ca-app-pub-6870019974253956/4241465282'} bannerSize='smartBannerPortrait'/>
+                <View style={styles.ad}>
+                    <AdMobBanner adUnitID={'ca-app-pub-6870019974253956/4241465282'} bannerSize='smartBannerPortrait'
+                                />
+                </View>
             </ScrollView>
         );
     }
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: 'bold',
         backgroundColor: '#1A2640',
-        color:'#8293FF'
+        color: '#8293FF'
     },
     item: {
         padding: 10,
@@ -155,6 +158,9 @@ const styles = StyleSheet.create({
     },
     itemText: {
         fontSize: 18,
-        color:'#E1E4F3'
+        color: '#E1E4F3'
+    },
+    ad: {
+        bottom: 0
     }
 });
