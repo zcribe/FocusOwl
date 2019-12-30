@@ -1,6 +1,7 @@
 ![FocusOwl logo](assets/images/repohead.png)
 
-# FocusOwl: A simple and elegant productivity tool built with React-Native
+# FocusOwl
+##### A simple and elegant productivity tool built with React-Native
 
 ### Concept
 
