@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import {Dimensions, ImageBackground, ScrollView, StyleSheet, Text, View} from 'react-native';
 import {ContributionGraph, LineChart} from "react-native-chart-kit";
-import * as SQLite from "expo-sqlite";
 import {AdMobBanner} from "expo-ads-admob";
 
-const DB_NAME = 'sessionStore';
-const DB = SQLite.openDatabase(DB_NAME);
+import readData from "../components/Links/DatabaseUtils";
+
 const screenWidth = Dimensions.get("window").width;
 const screenHeight = Dimensions.get("window").height;
 
@@ -28,20 +27,25 @@ const chartConfig = {
 export default class LinksScreen extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
             totalMinutes: 0,
             weekMinutes: [0, 0, 0, 0, 0, 0, 0, 0],
             threeMonthsCounts: [{}]
         };
-
-        this.readData = this.readData.bind(this);
         this.objArrToArr = this.objArrToArr.bind(this);
         this.generateDayLabels = this.generateDayLabels.bind(this);
-        this.readData()
+
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        this.readData()
+        // readData();
+        // this.setState({
+        //     totalMinutes:results['minutes'],
+        //     weekMinutes:results['week'],
+        //     threeMonthsCounts:results['three_months']
+        // });
+
     }
 
     objArrToArr(objArr) {
@@ -85,57 +89,7 @@ export default class LinksScreen extends Component {
         return labelNameArray
     }
 
-    readData() {
-        // Reads the data in from DB that is needed for graph generation
 
-        // READ TODAY
-        DB.transaction(tx => {
-            tx.executeSql(`
-                        SELECT workMinutes
-                        FROM days
-                        WHERE date = DATE('now')`,
-                null,
-                (trans, res) => {
-
-                    if (res['rows']['length'] > 0) {
-                        let totalMinutes = res['rows']['_array'][0]['workMinutes']
-                        this.setState({
-                            totalMinutes: totalMinutes
-                        })
-                    }
-                })
-        });
-
-        // READ WEEK
-        DB.transaction(tx => {
-            tx.executeSql(`
-                        SELECT workMinutes
-                        FROM days
-                        WHERE date BETWEEN DATE('now', '-7 day') and DATE('now')`,
-                null,
-                (trans, res) => {
-                    let weekMinutes = this.objArrToArr(res['rows']['_array'])
-                    this.setState({
-                        weekMinutes: weekMinutes
-                    })
-                })
-        }, );
-
-        // READ THREE MONTHS
-        DB.transaction(tx => {
-            tx.executeSql(`
-                        SELECT workCount AS count, date
-                        FROM days
-                        WHERE date BETWEEN DATE('now', '-90 day') and DATE('now')`,
-                null,
-                (trans, res) => {
-
-                    this.setState({
-                        threeMonthsCounts: res['rows']['_array']
-                    })
-                })
-        });
-    }
 
     render() {
         let data = {
