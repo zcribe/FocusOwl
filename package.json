@@ -43,7 +43,7 @@
     "redux-thunk": "2.3.0",
     "sentry-expo": "2.1.2",
     "sqlite3": "4.2.0",
-    "typeorm": "0.2.29"
+    "typeorm": "0.3.20"
   },
   "devDependencies": {
     "babel-preset-expo": "7.1.0",
